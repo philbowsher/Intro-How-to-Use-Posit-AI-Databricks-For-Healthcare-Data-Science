@@ -1,0 +1,22 @@
+# Credentials — never commit
+.env
+
+# Quarto rendered output
+*.html
+/_freeze/
+/.quarto/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store

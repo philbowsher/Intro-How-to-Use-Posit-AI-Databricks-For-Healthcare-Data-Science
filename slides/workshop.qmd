@@ -1,0 +1,584 @@
+---
+title: "Databricks + Posit"
+subtitle: "Building Meridian Health Trust Clinical Analytics with Positron"
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    width: 1600
+    height: 900
+    slide-number: true
+    progress: true
+    title-slide-attributes:
+      data-background-color: white
+      data-background-image: figures/sample-title-slide-option-1.png
+      data-background-size: contain
+    footer: "Databricks + Posit Workshop · Meridian Health Trust Clinical Analytics"
+execute:
+  echo: false
+  warning: false
+knitr:
+  opts_chunk:
+    echo: false
+    dpi: 300
+    message: false
+    warning: false
+---
+
+## Hello! 👋 {.center}
+
+<center>
+<img src="https://github.com/posit-dev.png" style="border-radius: 25%; margin-bottom:20px;" width="160px"/>
+
+**Posit Assistant — Your AI Co-Developer**
+
+::: incremental
+- 🏥 Building Clinical Analytics on Databricks + Positron
+- 🤖 I write all your code, create all your files
+- ⚡ You describe what you need, I build it
+:::
+</center>
+
+::: footer
+Databricks + Posit Workshop · Meridian Health Trust Clinical Analytics
+:::
+
+---
+
+## What We'll Build Today 🏗️
+
+**Four outputs, one Databricks connection.**
+
+**You describe them. I create them.**
+
+::: incremental
+1. 📋 **new_analysis.qmd** — data import + exploration
+2. 📊 **Dashboard.qmd** — KPI dashboard
+3. ⚡ **app.py** — reactive web app (Shiny)
+4. 🎛️ **app_streamlit.py** — what-if capacity planner
+:::
+
+<div class="solutions-box">
+💡 **Stuck?** Every output has a ready-to-run solution in `solutions/` you can run immediately.
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## The Architecture 🗺️
+
+:::: {.columns}
+::: {.column width="50%"}
+**Two layers:**
+
+- **Posit** (your IDE)
+- **Databricks** (SQL warehouse + Healthcare data)
+
+Posit queries live Databricks. No data movement.
+:::
+::: {.column width="50%"}
+```
+┌─────────────────────┐
+│   POSITRON IDE      │  ← You
+│ + Posit Assistant   │
+└──────────┬──────────┘
+           │ SQL query
+           ↓ result set
+┌─────────────────────┐
+│  DATABRICKS         │
+│  SQL Warehouse      │
+│  + Healthcare data         │
+│  + Unity Catalog    │
+└─────────────────────┘
+```
+:::
+::::
+
+::: footer
+posit.co/solutions/databricks
+:::
+
+---
+
+# PHASE 1: Connectivity
+
+---
+
+## Step 1 — Get Your Databricks Workspace 🚀
+
+**Sign up:** [databricks.com/learn/free-edition](https://www.databricks.com/learn/free-edition)
+
+**Find your HOST:**
+- Look at your browser URL
+- Copy everything up to `.com` (e.g., `dbc-xxxx.cloud.databricks.com`)
+- Save as **DATABRICKS_HOST**
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Step 1b — Find Your SQL Warehouse & HTTP Path 🏭
+
+**In Databricks UI:**
+
+1. Click **SQL Warehouses** on the left
+2. Click your active warehouse
+3. Click **Connection details**
+4. Copy the **HTTP Path** (e.g., `/sql/1.0/warehouses/xxxxxxxx`)
+5. Save as **DATABRICKS_HTTP_PATH**
+
+<div class="tip-box">
+💡 Warehouse "Stopped"? Click **Start** (waits ~30 seconds).
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Step 2 — Generate Your Access Token (PAT) 🔐
+
+**In Databricks UI:**
+
+1. Click your **user profile** (top right)
+2. Click **Settings** → **Developer**
+3. Click **Manage** next to **Access tokens**
+4. Click **Generate new token**
+5. **Copy immediately** — Databricks never shows it again
+
+<div class="warning-box">
+⚠️ **CRITICAL:** Do not lose this token.
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+# PHASE 2: Environment
+
+---
+
+## Step 5 — Fork the Workshop Repo 🍴
+
+**Go to GitHub and fork this repo:**
+
+```
+https://github.com/philbowsher/Intro-How-to-Use-Posit-AI-Databricks-For-Healthcare-Data-Science
+```
+
+**Then clone it locally and open in Positron.**
+
+This is your project folder. Everything goes here.
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Step 6 — Create a Python Project in Positron 🛠️
+
+**Before anything else:**
+
+1. Open Positron
+2. File → New Project → Python
+3. Choose a name (e.g., `my-databricks-workshop`)
+4. Select folder location
+5. Positron creates `.venv` automatically
+
+<div class="tip-box">
+💡 `.venv` isolates workshop packages from your system Python.
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Step 6b — The Positron IDE {.center}
+
+:::: {.columns}
+::: {.column width="50%"}
+**Positron: your data science IDE**
+
+- Built on VS Code
+- Native Python + R support
+- Data explorer · Plot history · Console
+- **Me: Posit Assistant AI** (bottom-left chat icon)
+:::
+::: {.column width="50%"}
+**Four panes:**
+
+| Pane | Purpose |
+|---|---|
+| **Editor** | I write code here |
+| **Console** | Test and run code |
+| **Data Explorer** | Inspect DataFrames |
+| **Viewer** | Preview output |
+
+👉 Python interpreter: top-right corner
+:::
+::::
+
+::: footer
+positron.posit.co
+:::
+
+---
+
+## Setup: Install Packages & Create .env 📦
+
+**Open me (Posit Assistant, bottom-left chat icon)**
+
+**Tell me:**
+
+> "Install these packages via pip: databricks-sql-connector, polars, plotly, shiny, streamlit, python-dotenv, nbformat, nbclient, nbconvert, ipykernel. Then create a .env file in my project root with fields: DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN, QUARTO_PYTHON=.venv/bin/python (leave the values blank — I'll fill them in)."
+
+**I'll create the `.env` file for you with the template.**
+
+**Then: Fill in your actual credentials** (from Steps 1–2):
+- `DATABRICKS_HOST` = your workspace URL
+- `DATABRICKS_HTTP_PATH` = from SQL Warehouse connection details
+- `DATABRICKS_TOKEN` = your Personal Access Token (from Step 2)
+- `QUARTO_PYTHON=.venv/bin/python` (leave as is)
+
+**Save the file. Your credentials are now secure in `.env`. I'll reference them when I write code.**
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## From Here On: Just Ask Me 🤖
+
+**The workflow is simple:**
+
+1. Open a `.qmd` or `.py` file in Positron
+2. Press `Cmd/Ctrl+I` to open **me: Posit Assistant**
+3. **Describe what you need**
+4. **I create files and write all the code**
+5. You render or run it
+
+<div class="solutions-box">
+**That's it.** You describe → I build → You deploy. No copy-paste. No manual steps.
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Your Safety Net: The Solutions Folder 🆘
+
+**If anything goes wrong — just run the solutions.**
+
+```
+solutions/
+├── databricks_clinical_analytics.qmd
+├── Dashboard.qmd
+├── app.py
+├── app_streamlit.py
+└── streamlit_app/app.py
+```
+
+**Three ways to approach:**
+
+| Approach | Who it's for |
+|---|---|
+| 🏗️ Build with me | Want to learn |
+| 🔍 Build + see solutions | Most attendees |
+| ▶️ Just run solutions | Want to see it work now |
+
+**To run:** `quarto render solutions/Dashboard.qmd` · `shiny run solutions/app.py` · `streamlit run solutions/app_streamlit.py`
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+# PHASE 3: Workflows
+
+---
+
+## Workflow 1: new_analysis.qmd 📋
+
+**You have:** `new_analysis.qmd` (already in project root, blank template)
+
+**Tell me (Posit Assistant):**
+
+> "Fill in new_analysis.qmd: (1) use python-dotenv to load DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN from my .env file, (2) connect to Databricks using those credentials, (3) execute a VALUES query with hospital, specialty, days_waiting, priority, (4) convert to Polars DataFrame `df`. Then add: average waiting days by specialty, and a Plotly bar chart with Professional blue (#005EB8) bars and a red dashed line at 126 days."
+
+**I'll write all the code directly into your file.** (I'll use `os.getenv()` to read from `.env` — your token never touches my prompts.)
+
+Render it and see your data.
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Understanding the Data Workflow 🔄
+
+**What you just built has three phases:**
+
+```yaml
+# PHASE 1: Setup (connection verified)
+import polars as pl
+from databricks import sql
+conn = sql.connect(...)  # ✓ Working
+
+# PHASE 2: Load data (synthetic or real)
+query = """SELECT * FROM (VALUES ...)"""
+df = pl.DataFrame(...)
+
+# PHASE 3: Explore (ask me for analysis)
+# Add aggregations, filters, charts
+# Everything uses 'df' as the source
+```
+
+**Why this matters:**
+
+The DataFrame `df` is your contract. Dashboard, Shiny, and Streamlit will all read from it. Change the query once, every downstream output updates automatically.
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Workflow 2: Dashboard.qmd 📊
+
+**Tell me (Posit Assistant):**
+
+> "Create a new file Dashboard.qmd in my project root. Build a Quarto dashboard with: (1) 4 KPI value boxes (Total Referrals, Average Wait Days, Max Wait, 18-Week Breaches >126 days), (2) interactive Plotly bar chart by specialty, (3) box plot by priority level. Use Professional blue (#005EB8) for colours. Use the same Databricks connection setup as new_analysis.qmd."
+
+**I'll create the file and write all the code.**
+
+Render it.
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Workflow 3: app.py ⚡
+
+**Tell me (Posit Assistant):**
+
+> "Create a new file app.py in my project root. Build a Shiny for Python app with: (1) sidebar filters for Priority and Specialty, (2) 4 reactive KPI value boxes that update when filters change, (3) 3 interactive Plotly charts that filter reactively. Use the same Databricks connection setup as new_analysis.qmd."
+
+**I'll create the file and write all the code.**
+
+Run `shiny run app.py`
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Workflow 4: app_streamlit.py 🎛️
+
+**Tell me (Posit Assistant):**
+
+> "Create a new file app_streamlit.py in my project root. Build a Streamlit app with: (1) sidebar slider to adjust RTT wait targets (14–126 days), (2) reactive metrics showing breaches at target, delta vs 126-day baseline, and estimated additional FTE staff needed (formula: breaches × 45 / (7.5 × 60 × 5 × 48)), (3) update all metrics and charts as the slider moves. Use the same Databricks connection setup as new_analysis.qmd."
+
+**I'll create the file and write all the code.**
+
+Run `streamlit run app_streamlit.py`
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+# Reference Material
+
+---
+
+## Comparing the Frameworks 🔍
+
+| | **Quarto Report** | **Quarto Dashboard** | **Shiny** | **Streamlit** |
+|---|---|---|---|---|
+| **Output** | HTML/PDF | HTML | Web app | Web app |
+| **Interactivity** | Static | Static + Plotly | Fully reactive | Fully reactive |
+| **Server needed?** | No | No | Yes | Yes |
+| **Best for** | Exec reports | KPI monitoring | Internal tools | What-if tools |
+| **Deploy to** | Email | Posit Connect | Posit Connect | Posit Connect |
+
+<div class="tip-box">
+💡 Start with Quarto reports to build trust, graduate to Shiny for operational teams, Streamlit for planning conversations.
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Unity Catalog Governance 🛡️
+
+**Every query is audited at the Databricks layer.**
+
+```python
+query = """
+SELECT grantee, privilege_type, table_name
+FROM system.information_schema.table_privileges
+WHERE table_catalog != 'system'
+"""
+df_governance = query_databricks(query)
+```
+
+**Key point:** Row-level and column-level security are enforced **inside Databricks**. Your Posit apps inherit this automatically—no way to bypass data access controls.
+
+<div class="step-box">
+✅ This is why Healthcare organisations trust Posit + Databricks for patient data.
+</div>
+
+::: footer
+Databricks Unity Catalog · Data Governance & Security
+:::
+
+---
+
+## Troubleshooting Checklist ✅
+
+**Ask me first** — I can usually fix issues and regenerate code.
+
+**If you want to troubleshoot manually:**
+
+- [ ] `.env` file in project root with all three credentials filled in?
+- [ ] `QUARTO_PYTHON=.venv/bin/python` set?
+- [ ] Python interpreter set to `.venv` (top-right)?
+- [ ] All packages installed? (`pip list | grep databricks-sql-connector`)
+- [ ] Databricks warehouse running?
+
+<div class="solutions-box">
+✋ **Stuck?** Run the corresponding solution file in `solutions/`. Everything there is tested and works. Or ask me to regenerate your code.
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## What's Next — The AI Layer 🤖
+
+**Everything we built today is the foundation. This is where it goes next.**
+
+:::: {.columns}
+::: {.column width="33%"}
+<div class="step-box">
+**chatlas** *(Python)*
+
+Embed LLMs directly in workflows. Connect to Claude, GPT-4, or Databricks endpoints.
+
+```python
+from chatlas import ChatDatabricks
+chat = ChatDatabricks(model="claude-3-5-sonnet")
+chat.chat("Summarise RTT breaches")
+```
+</div>
+:::
+::: {.column width="33%"}
+<div class="step-box">
+**querychat**
+
+Let clinical staff ask questions in plain English — converted to SQL automatically.
+
+> "Which hospital has the longest average wait?"
+
+No SQL knowledge required.
+</div>
+:::
+::: {.column width="33%"}
+<div class="step-box">
+**Orbital**
+
+Deploy ML pipelines as SQL. Runs natively inside Databricks.
+
+Perfect for Healthcare predictive models (readmission risk, demand forecasting).
+</div>
+:::
+::::
+
+::: footer
+posit.co/blog/posit-databricks-product-announcement-aug-2025
+:::
+
+---
+
+## Resources 📚
+
+:::: {.columns}
+::: {.column width="50%"}
+**Posit + Databricks**
+
+- [posit.co/solutions/databricks](https://posit.co/solutions/databricks)
+- [Positron IDE](https://positron.posit.co)
+- [Shiny for Python](https://shiny.posit.co/py/)
+- [Quarto Dashboards](https://quarto.org/docs/dashboards/)
+- [chatlas](https://posit-dev.github.io/chatlas/)
+:::
+::: {.column width="50%"}
+**Key things to remember:**
+
+1. Ask **me (Posit Assistant)** to do everything
+2. Credentials always in `.env`
+3. Use **Polars** not pandas
+4. `VALUES` clause = zero setup
+5. Unity Catalog enforces security automatically
+6. `solutions/` folder = everything ready to run
+7. **If stuck, ask me to regenerate code**
+:::
+::::
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Thank You! 🏥 {.center}
+
+<center>
+<img src="https://github.com/posit-dev.png" style="border-radius: 25%; margin-bottom: 20px;" width="160px"/>
+
+**You now have everything you need.**
+
+<br>
+
+**GitHub repo:**
+
+```
+https://github.com/philbowsher/Intro-How-to-Use-Posit-AI-Databricks-For-Healthcare-Data-Science
+```
+
+<br>
+
+::: incremental
+- 🍴 Fork the repo · Clone locally · Open in Positron
+- 📁 Run `solutions/` anytime to see working examples
+- 🤖 Ask me (Posit Assistant) for any modifications or new analyses
+- 🚀 Next session: Adding AI with chatlas + querychat on Databricks
+:::
+</center>
+
+::: footer
+Databricks + Posit Workshop · Meridian Health Trust Clinical Analytics
+:::

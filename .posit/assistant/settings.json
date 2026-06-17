@@ -1,0 +1,32 @@
+{
+  "permission": {
+    "executeCode": {
+      "*": "allow"
+    },
+    "bash": {
+      "which *": "allow",
+      "quarto *": "allow",
+      ".venv/bin/python *": "allow",
+      "head *": "allow",
+      "cd *": "allow",
+      "quarto render *": "allow",
+      "tail *": "allow",
+      "/opt/python/3.12.3/bin/python3 *": "allow",
+      "/usr/lib/rstudio-server/bin/quarto/bin/quarto *": "allow",
+      "*": "allow",
+      "grep *": "allow",
+      "sed *": "allow",
+      "echo *": "allow"
+    },
+    "edit": {
+      "*.qmd": "allow",
+      "*/.env": "allow",
+      "*/.gitignore": "allow",
+      "*.py": "allow",
+      "*.scss": "allow"
+    },
+    "read": {
+      "*.qmd": "allow"
+    }
+  }
+}

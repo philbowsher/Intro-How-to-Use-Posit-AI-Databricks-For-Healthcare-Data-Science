@@ -1,0 +1,288 @@
+---
+title: "NHS Wales · Clinical Access & Performance"
+subtitle: "Referral-to-Treatment Intelligence Dashboard"
+author: "Clinical Intelligence Unit"
+date: today
+format:
+  dashboard:
+    orientation: rows
+    theme: cosmo
+    scrolling: true
+    nav-buttons:
+      - icon: table
+        text: "Workshop Data"
+        href: hywel_dda_databricks.html
+logo: https://www.nhs.uk/nhschoicescontentapi/healthcarelocator/images/nhs-logo.png
+execute:
+  echo: false
+  warning: false
+---
+
+```{python}
+#| label: setup
+#| output: false
+
+import os
+import polars as pl
+import plotly.express as px
+from databricks import sql
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# ── NHS brand colours ──────────────────────────────────────────────────────────
+NHS_BLUE   = "#005EB8"
+NHS_DARK   = "#003087"
+NHS_GREEN  = "#009639"
+NHS_AMBER  = "#FFB81C"
+NHS_RED    = "#DA291C"
+NHS_PURPLE = "#7C2855"
+
+PRIORITY_COLOURS = {
+    "2-Week Wait": NHS_RED,
+    "Urgent":      NHS_AMBER,
+    "Routine":     NHS_BLUE,
+}
+
+HOSPITAL_COLOURS = {
+    "Glangwili General Hospital": NHS_BLUE,
+    "Withybush General Hospital": NHS_DARK,
+    "Prince Philip Hospital":     NHS_GREEN,
+    "Bronglais General Hospital": NHS_PURPLE,
+}
+
+# ── Databricks connection ──────────────────────────────────────────────────────
+conn = sql.connect(
+    server_hostname=os.environ["DATABRICKS_HOST"],
+    http_path=os.environ["DATABRICKS_HTTP_PATH"],
+    access_token=os.environ["DATABRICKS_TOKEN"],
+)
+
+# ── Load synthetic NHS Wales waiting list from Databricks compute ──────────────
+query = """
+SELECT * FROM (VALUES
+    ('Glangwili General Hospital', 'Cardiology',    42,  'Urgent',       'RTT'),
+    ('Glangwili General Hospital', 'Orthopaedics',  140, 'Urgent',       'RTT'),
+    ('Glangwili General Hospital', 'Urology',        67, 'Routine',      'RTT'),
+    ('Glangwili General Hospital', 'Dermatology',    89, 'Routine',      'RTT'),
+    ('Glangwili General Hospital', 'Oncology',       12, '2-Week Wait',  '2WW'),
+    ('Withybush General Hospital', 'Orthopaedics',  118, 'Routine',      'RTT'),
+    ('Withybush General Hospital', 'Cardiology',     65, 'Urgent',       'RTT'),
+    ('Withybush General Hospital', 'Urology',       134, 'Routine',      'RTT'),
+    ('Withybush General Hospital', 'Dermatology',    45, 'Routine',      'RTT'),
+    ('Withybush General Hospital', 'Oncology',        9, '2-Week Wait',  '2WW'),
+    ('Prince Philip Hospital',     'Cardiology',     15, 'Routine',      'RTT'),
+    ('Prince Philip Hospital',     'Orthopaedics',   92, 'Routine',      'RTT'),
+    ('Prince Philip Hospital',     'Urology',        78, 'Urgent',       'RTT'),
+    ('Prince Philip Hospital',     'Dermatology',    55, 'Routine',      'RTT'),
+    ('Prince Philip Hospital',     'Oncology',        6, '2-Week Wait',  '2WW'),
+    ('Bronglais General Hospital', 'Cardiology',     22, 'Routine',      'RTT'),
+    ('Bronglais General Hospital', 'Oncology',        8, '2-Week Wait',  '2WW'),
+    ('Bronglais General Hospital', 'Orthopaedics',  156, 'Routine',      'RTT'),
+    ('Bronglais General Hospital', 'Urology',        98, 'Routine',      'RTT'),
+    ('Bronglais General Hospital', 'Dermatology',    33, 'Urgent',       'RTT')
+) AS t(hospital_site, specialty, days_waiting, priority_level, pathway)
+"""
+
+with conn.cursor() as cur:
+    cur.execute(query)
+    df = pl.DataFrame(
+        cur.fetchall(),
+        schema=["Hospital", "Specialty", "Days_Waiting", "Priority", "Pathway"],
+        orient="row",
+    )
+
+conn.close()
+
+# ── KPI calculations ───────────────────────────────────────────────────────────
+# NHS 18-week (126 day) referral-to-treatment target
+RTT_THRESHOLD   = 126
+total_patients  = df.height
+avg_wait        = round(df["Days_Waiting"].mean(), 1)
+max_wait        = df["Days_Waiting"].max()
+breach_count    = df.filter(pl.col("Days_Waiting") > RTT_THRESHOLD).height
+breach_pct      = round((breach_count / total_patients) * 100, 1)
+```
+
+## Row {height="150px"}
+
+```{python}
+#| content: valuebox
+#| title: "Total Active Referrals"
+dict(icon="people-fill", color="primary", value=total_patients)
+```
+
+```{python}
+#| content: valuebox
+#| title: "Average Wait (Days)"
+dict(icon="clock-history", color="info", value=f"{avg_wait} days")
+```
+
+```{python}
+#| content: valuebox
+#| title: "Longest Wait"
+dict(icon="exclamation-circle-fill", color="warning", value=f"{max_wait} days")
+```
+
+```{python}
+#| content: valuebox
+#| title: "18-Week Breaches"
+dict(icon="shield-exclamation", color="danger", value=f"{breach_count} ({breach_pct}%)")
+```
+
+## Row {height="420px"}
+
+### Column {width=58%}
+
+```{python}
+#| title: "Average Waiting Days by Hospital Site"
+
+df_hosp = (
+    df.group_by("Hospital")
+    .agg(pl.col("Days_Waiting").mean().round(1).alias("Avg_Wait"))
+    .sort("Avg_Wait", descending=True)
+)
+
+fig = px.bar(
+    df_hosp,
+    x="Avg_Wait",
+    y="Hospital",
+    orientation="h",
+    color="Hospital",
+    color_discrete_map=HOSPITAL_COLOURS,
+    text="Avg_Wait",
+    labels={"Avg_Wait": "Avg Days Waiting", "Hospital": ""},
+)
+fig.add_vline(
+    x=RTT_THRESHOLD,
+    line_dash="dash",
+    line_color=NHS_RED,
+    annotation_text="18-wk target (126 days)",
+    annotation_position="top right",
+    annotation_font_color=NHS_RED,
+)
+fig.update_traces(texttemplate="%{text} days", textposition="outside")
+fig.update_layout(
+    showlegend=False,
+    margin=dict(l=10, r=80, t=10, b=10),
+    plot_bgcolor="white",
+    xaxis=dict(showgrid=True, gridcolor="#e8e8e8"),
+)
+fig
+```
+
+### Column {width=42%}
+
+```{python}
+#| title: "Referrals by Priority Level"
+
+df_priority = df.group_by("Priority").agg(pl.len().alias("Count"))
+
+fig = px.pie(
+    df_priority,
+    names="Priority",
+    values="Count",
+    hole=0.55,
+    color="Priority",
+    color_discrete_map=PRIORITY_COLOURS,
+)
+fig.update_traces(
+    textinfo="percent+label",
+    textfont_size=13,
+    pull=[0.03, 0.03, 0.03],
+)
+fig.update_layout(
+    showlegend=True,
+    legend=dict(orientation="h", yanchor="bottom", y=-0.15),
+    margin=dict(l=10, r=10, t=10, b=40),
+    annotations=[dict(
+        text=f"<b>{total_patients}</b><br>Patients",
+        x=0.5, y=0.5,
+        font_size=16,
+        showarrow=False,
+    )],
+)
+fig
+```
+
+## Row {height="420px"}
+
+### Column {width=55%}
+
+```{python}
+#| title: "Wait Time Distribution by Specialty"
+
+fig = px.box(
+    df,
+    x="Specialty",
+    y="Days_Waiting",
+    color="Specialty",
+    points="all",
+    hover_data=["Hospital", "Priority"],
+    labels={"Days_Waiting": "Days Waiting", "Specialty": ""},
+    color_discrete_sequence=[
+        NHS_BLUE, NHS_DARK, NHS_GREEN, NHS_AMBER, NHS_PURPLE
+    ],
+)
+fig.add_hline(
+    y=RTT_THRESHOLD,
+    line_dash="dash",
+    line_color=NHS_RED,
+    annotation_text="18-wk target",
+    annotation_position="top right",
+    annotation_font_color=NHS_RED,
+)
+fig.update_layout(
+    showlegend=False,
+    margin=dict(l=10, r=10, t=10, b=10),
+    plot_bgcolor="white",
+    yaxis=dict(showgrid=True, gridcolor="#e8e8e8"),
+)
+fig
+```
+
+### Column {width=45%}
+
+```{python}
+#| title: "Full Waiting List Roster"
+
+import plotly.graph_objects as go
+
+# Colour-code rows by wait time severity
+def row_colour(days):
+    if days > RTT_THRESHOLD:
+        return NHS_RED
+    elif days > 84:
+        return NHS_AMBER
+    else:
+        return "#ffffff"
+
+row_colours = [row_colour(d) for d in df["Days_Waiting"].to_list()]
+
+fig = go.Figure(
+    go.Table(
+        header=dict(
+            values=["<b>Hospital</b>", "<b>Specialty</b>", "<b>Days Waiting</b>", "<b>Priority</b>", "<b>Pathway</b>"],
+            fill_color=NHS_BLUE,
+            font=dict(color="white", size=12),
+            align="left",
+            height=32,
+        ),
+        cells=dict(
+            values=[
+                df["Hospital"].to_list(),
+                df["Specialty"].to_list(),
+                df["Days_Waiting"].to_list(),
+                df["Priority"].to_list(),
+                df["Pathway"].to_list(),
+            ],
+            fill_color=[row_colours],
+            font=dict(size=11),
+            align="left",
+            height=28,
+        ),
+    )
+)
+fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+fig
+```

@@ -1,0 +1,183 @@
+---
+title: "Databricks SQL Workshop"
+subtitle: "NHS Wales — Clinical Analytics"
+author: "Data Engineering Team"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contents"
+    theme: cosmo
+    code-fold: true
+    code-summary: "Show SQL / Python"
+    highlight-style: github
+    self-contained: true
+execute:
+  echo: true
+  warning: false
+  error: true
+---
+
+## Overview
+
+This document demonstrates Databricks SQL capabilities for NHS Wales clinical analytics.
+It verifies the live warehouse connection, queries a synthetic NHS waiting list dataset,
+and explores the Unity Catalog namespace.
+
+Credentials are loaded from a `.env` file — never hardcoded. See `.env.example` for the
+required variables.
+
+---
+
+## Setup: Connect to Databricks
+
+```{python}
+#| label: setup
+#| code-summary: "Establish Databricks connection"
+
+import os
+import polars as pl
+from databricks import sql
+from dotenv import load_dotenv
+
+load_dotenv()
+
+conn = sql.connect(
+    server_hostname=os.environ["DATABRICKS_HOST"],
+    http_path=os.environ["DATABRICKS_HTTP_PATH"],
+    access_token=os.environ["DATABRICKS_TOKEN"],
+)
+
+print("✓ Connected to Databricks SQL Warehouse")
+```
+
+---
+
+## 1. Catalog Discovery
+
+Verifies the live connection and explores the three-tier Unity Catalog namespace
+(`catalog` → `schema` → `table`).
+
+```{python}
+#| label: tbl-catalogs
+#| tbl-cap: "Available Databricks catalogs"
+
+with conn.cursor() as cur:
+    cur.execute("SHOW CATALOGS")
+    df_catalogs = pl.DataFrame(
+        cur.fetchall(),
+        schema=[desc[0] for desc in cur.description],
+        orient="row",
+    )
+
+df_catalogs
+```
+
+---
+
+## 2. NHS Wales Waiting List Analysis
+
+This query uses a `VALUES` clause to build a synthetic NHS waiting list dataset
+inline — no file uploads or external storage required. It features hospital sites
+in West Wales: **Glangwili**, **Withybush**, **Prince Philip**, and **Bronglais**.
+
+Average waiting times are calculated per hospital site and specialty, ordered by
+longest wait first.
+
+```{python}
+#| label: tbl-waiting-list
+#| tbl-cap: "Average waiting days by hospital site and specialty"
+
+query_waiting = """
+WITH mock_waiting_list AS (
+    SELECT * FROM (VALUES 
+        ('Glangwili General Hospital', 'Cardiology',   42,  'Urgent'),
+        ('Withybush General Hospital', 'Orthopaedics', 118, 'Routine'),
+        ('Prince Philip Hospital',     'Cardiology',   15,  'Routine'),
+        ('Glangwili General Hospital', 'Orthopaedics', 140, 'Urgent'),
+        ('Bronglais General Hospital', 'Oncology',     8,   '2-Week Wait'),
+        ('Withybush General Hospital', 'Cardiology',   65,  'Urgent'),
+        ('Prince Philip Hospital',     'Orthopaedics', 92,  'Routine'),
+        ('Bronglais General Hospital', 'Cardiology',   22,  'Routine')
+    ) AS t(hospital_site, specialty, days_waiting, priority_level)
+)
+SELECT 
+    hospital_site,
+    specialty,
+    COUNT(*)                    AS total_patients,
+    ROUND(AVG(days_waiting), 1) AS avg_days_waiting
+FROM mock_waiting_list
+GROUP BY hospital_site, specialty
+ORDER BY avg_days_waiting DESC
+"""
+
+with conn.cursor() as cur:
+    cur.execute(query_waiting)
+    df_waiting = pl.DataFrame(
+        cur.fetchall(),
+        schema=[desc[0] for desc in cur.description],
+        orient="row",
+    )
+
+df_waiting
+```
+
+---
+
+## 3. Data Governance Check (Unity Catalog)
+
+Inspects table-level privileges — demonstrating the Unity Catalog security layer
+essential for NHS-level data access control.
+
+```{python}
+#| label: tbl-governance
+#| tbl-cap: "Table privileges visible to this account"
+
+query_governance = """
+SELECT
+    grantee,
+    privilege_type,
+    table_catalog,
+    table_schema,
+    table_name,
+    is_grantable
+FROM system.information_schema.table_privileges
+WHERE table_catalog != 'system'
+ORDER BY table_catalog, table_schema, table_name
+LIMIT 25
+"""
+
+try:
+    with conn.cursor() as cur:
+        cur.execute(query_governance)
+        df_governance = pl.DataFrame(
+            cur.fetchall(),
+            schema=[desc[0] for desc in cur.description],
+            orient="row",
+        )
+    if df_governance.is_empty():
+        print("No table privileges visible to this account.")
+    else:
+        display(df_governance)
+except Exception as e:
+    print(f"Could not query privileges: {e}")
+```
+
+---
+
+## Teardown
+
+```{python}
+#| label: teardown
+#| echo: false
+
+conn.close()
+print("Connection closed.")
+```
+
+::: {.callout-note}
+## Data Privacy
+All queries in this document return only aggregated or synthetic data.
+Access to individual patient records requires appropriate Unity Catalog role grants.
+:::
