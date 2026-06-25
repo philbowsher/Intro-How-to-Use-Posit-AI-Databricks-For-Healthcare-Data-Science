@@ -1,12 +1,12 @@
-# Meridian Health Trust Clinical Analytics with Databricks + Posit
+# AI driven Analytics with Databricks + Posit
 
 # https://pub.current.posit.team/public/Posit_Databricks_Healthcare_Data_Science/#/title-slide
 
 A workshop demonstrating how to build clinical analytics applications using Databricks as your data warehouse and Posit tools (Positron IDE, Quarto, Shiny, Streamlit) as your development environment.
 
-**Workshop delivery:** Meridian Health Trust  
-**Instructor:** Posit Assistant (AI co-developer in Positron)  
-**Attendees:** 30 clinical analytics & IT staff
+**Workshop delivery:** AI driven Analytics with Databricks + Posit 
+**Instructor:** Posit Team & Posit Assistant (AI co-developer in Positron)  
+**Attendees:** 10-30 clinical analytics & IT staff
 
 ---
 
