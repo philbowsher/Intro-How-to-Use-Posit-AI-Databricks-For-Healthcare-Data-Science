@@ -77,13 +77,30 @@ Databricks + Posit Workshop
 
 ---
 
-# PHASE 1: Connectivity {.center}
+## Key Things to Remember (read this now, not just at the end)
 
-::: r-fit-text
-🔌 **Connectivity**
+1. Ask **me (Posit Assistant)** to do everything
+2. Credentials always in `.env`
+3. `solutions/` = everything ready to run if you get stuck
+4. If stuck, ask me to regenerate code — don't debug alone
+
+::: footer
+Databricks + Posit Workshop
 :::
 
-⏱ ~15-20 min — Databricks signup/PAT/warehouse startup is a wall-clock risk, not a conceptual one
+---
+
+## Choose Your Language (decide now) 🐍
+
+**Everything today can be built in Python, or in R using the same Databricks data via `reticulate`.**
+
+- Python is the default path for all four workflows
+- R has its own version of Workflows 1–2 (more on this later)
+- Same data, same Databricks backend, either way
+
+<div class="tip-box">
+💡 If you're an R user, this matters for setup too — you'll also run `Rscript scripts/check_packages.R`.
+</div>
 
 ::: footer
 Databricks + Posit Workshop
@@ -92,6 +109,8 @@ Databricks + Posit Workshop
 ---
 
 ## Step 1 — Get Your Databricks Workspace 🚀
+
+**Phase 1: Connectivity** ⏱ ~15-20 min
 
 **Sign up:** [databricks.com/learn/free-edition](https://www.databricks.com/learn/free-edition)
 
@@ -146,19 +165,9 @@ Databricks + Posit Workshop
 
 ---
 
-# PHASE 2: Environment {.center}
-
-::: r-fit-text
-🛠️ **Environment**
-:::
-
-::: footer
-Databricks + Posit Workshop
-:::
-
----
-
 ## Step 3 — Fork the Workshop Repo 🍴
+
+**Phase 2: Environment**
 
 **Fork and clone:**
 
@@ -265,11 +274,19 @@ Databricks + Posit Workshop
 
 ---
 
-# PHASE 3: Workflows {.center}
+## Troubleshooting Checklist (bookmark this before you start) ✅
 
-::: r-fit-text
-📋 **Workflows**
-:::
+**Ask me first** — I can usually fix issues and regenerate code.
+
+- [ ] Ran `scripts/check_packages.py`?
+- [ ] Ran `scripts/databricks_setup.py` (did it complete without hanging)?
+- [ ] `.env` filled in, `QUARTO_PYTHON=.venv/bin/python` set?
+- [ ] Python interpreter set to `.venv` (top-right)?
+- [ ] Databricks warehouse running (not "Stopped")?
+
+<div class="solutions-box">
+✋ **Stuck?** Run the corresponding solution file in `solutions/`. Or ask me to regenerate your code.
+</div>
 
 ::: footer
 Databricks + Posit Workshop
@@ -279,7 +296,7 @@ Databricks + Posit Workshop
 
 ## From Here On: Just Ask Me 🤖
 
-**The four working documents are already scaffolded — headers and section markers, no placeholder code.**
+**Phase 3: Workflows.** The four working documents are already scaffolded — headers and section markers, no placeholder code.
 
 1. Open a scaffolded file (`new_analysis.qmd`, `Dashboard.qmd`, `app.py`, `app_streamlit.py`)
 2. Find a section marker (an HTML/Python comment saying what to ask for)
@@ -334,8 +351,6 @@ Databricks + Posit Workshop
 
 > "Add a reactive.calc that filters BASE_DATA by the sidebar inputs, then wire the KPI and chart outputs to it."
 
-If reactive wiring isn't clicking, ask Posit Assistant to explain the specific chunk it just wrote before moving to the next section — don't stack unexplained reactive code.
-
 Run `source .venv/bin/activate && shiny run app.py` (activating first avoids a "command not found" some students will otherwise hit).
 
 ::: footer
@@ -362,25 +377,9 @@ Databricks + Posit Workshop
 
 ---
 
-# {.center}
+## Break Time! 📖
 
-::: r-fit-text
-📑 **Break Time!** 📖
-:::
-
-::: footer
-Databricks + Posit Workshop
-:::
-
----
-
-# Choose Your Language {.center}
-
-::: r-fit-text
-🐍 **Python** or **R** via reticulate
-:::
-
-**Same Databricks backend, same dataset, either language — a live demo of Positron's polyglot IDE.**
+**Back in 10 minutes.** Grab a coffee — next up is the R path and deployment.
 
 ::: footer
 Databricks + Posit Workshop
@@ -392,7 +391,7 @@ Databricks + Posit Workshop
 
 **First:** `Rscript scripts/check_packages.R` — installs `reticulate`, `dplyr`, `ggplot2`, `gt` and confirms your `.venv` exists.
 
-**`new_analysis_r.qmd` and `Dashboard_r.qmd` are R-first twins of Workflows 1–2 — not a mixed-language file.**
+**`new_analysis_r.qmd` and `Dashboard_r.qmd` are separate R versions of Workflows 1 and 2** — not the same file mixing both languages, two distinct documents.
 
 > "Using the df data frame loaded above, create a ggplot2 bar chart of average Days_Waiting by Hospital, with a dashed red line at RTT_THRESHOLD."
 
@@ -412,6 +411,10 @@ There are **two separate, non-interoperable ways** to deploy to Posit Connect �
 
 - Positron's **Publish button** (UI-driven) — if you start this way, complete it fully
 - The `rsconnect-python` package/CLI — ask Posit Assistant to drive this directly if you'd rather it handle deployment
+
+<div class="tip-box">
+💡 Deploy whichever version you built — the Python or R rendered HTML output. Same two deploy paths apply either way; the language you picked doesn't change how you publish it.
+</div>
 
 Starting one and switching to the other mid-way means redoing authentication from scratch.
 
@@ -434,19 +437,9 @@ Databricks + Posit Workshop
 
 ---
 
-# Reference Material {.center}
-
-::: r-fit-text
-📚 **Reference Material**
-:::
-
-::: footer
-Databricks + Posit Workshop
-:::
-
----
-
 ## Comparing the Frameworks 🔍
+
+**Reference material.**
 
 | | **Quarto Report** | **Quarto Dashboard** | **Shiny** | **Streamlit** |
 |---|---|---|---|---|
@@ -486,34 +479,14 @@ Databricks Unity Catalog · Data Governance & Security
 
 ---
 
-## Troubleshooting Checklist ✅
-
-**Ask me first** — I can usually fix issues and regenerate code.
-
-- [ ] Ran `scripts/check_packages.py`?
-- [ ] Ran `scripts/databricks_setup.py` (did it complete without hanging)?
-- [ ] `.env` filled in, `QUARTO_PYTHON=.venv/bin/python` set?
-- [ ] Python interpreter set to `.venv` (top-right)?
-- [ ] Databricks warehouse running (not "Stopped")?
-
-<div class="solutions-box">
-✋ **Stuck?** Run the corresponding solution file in `solutions/`. Or ask me to regenerate your code.
-</div>
-
-::: footer
-Databricks + Posit Workshop
-:::
-
----
-
 ## What's Next — The AI Layer 🤖
 
 :::: {.columns}
 ::: {.column width="33%"}
 <div class="step-box">
-**chatlas** *(Python)*
+**chatlas** *(Python)* / **ellmer** *(R)*
 
-Embed LLMs directly in workflows. Connect to Claude, GPT-4, or Databricks endpoints.
+Embed LLMs directly in workflows. Connect to Claude, GPT-4, or Databricks endpoints — same idea, pick the package for your language.
 </div>
 :::
 ::: {.column width="33%"}
@@ -532,40 +505,17 @@ Deploy ML pipelines as SQL. Runs natively inside Databricks.
 :::
 ::::
 
+<div class="tip-box">
+💡 Positron itself can use a Databricks-hosted model as a model provider for Posit Assistant — not just OpenAI/Anthropic/Claude.
+</div>
+
 ::: footer
 posit.co/blog/posit-databricks-product-announcement-aug-2025
 :::
 
 ---
 
-## Key things to remember
-
-1. Ask **me (Posit Assistant)** to do everything
-2. Credentials always in `.env`
-3. Use **Polars** not pandas; the shared cache means most documents don't touch Databricks live every render
-4. `solutions/` = everything ready to run
-5. `SKILL.md` has the gotchas we actually hit testing this workshop — Assistant already knows them
-6. **If stuck, ask me to regenerate code**
-
-::: footer
-Databricks + Posit Workshop
-:::
-
----
-
-# Done! {.center}
-
-::: r-fit-text
-🎉 **Done!**
-:::
-
-::: footer
-Databricks + Posit Workshop
-:::
-
----
-
-## Thank You! 🏥 {.center}
+## Thank You! 🎉🏥 {.center}
 
 <center>
 <img src="https://github.com/posit-dev.png" style="border-radius: 25%; margin-bottom: 20px;" width="160px"/>

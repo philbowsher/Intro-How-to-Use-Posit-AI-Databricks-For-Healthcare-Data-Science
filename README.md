@@ -171,7 +171,7 @@ Data never leaves Databricks except as the cached result set. Posit queries it l
 
 - 🤖 Ask **Posit Assistant** for any modifications or new analyses
 - 📊 Publish your dashboards to Posit Connect
-- 🚀 Explore advanced AI features: `chatlas`, `querychat`, `Orbital`
+- 🚀 Explore advanced AI features: `chatlas`/`ellmer`, `querychat`, `Orbital` — Positron can also use a Databricks-hosted model as a model provider for Posit Assistant
 
 ---
 
