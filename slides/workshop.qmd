@@ -25,7 +25,7 @@ knitr:
 ## Hello! 👋 {.center}
 
 <center>
-<img src="https://github.com/posit-dev.png" style="border-radius: 25%; margin-bottom:20px;" width="160px"/>
+🤖
 
 **Posit Assistant — Your AI Co-Developer**
 
@@ -518,19 +518,7 @@ posit.co/blog/posit-databricks-product-announcement-aug-2025
 ## Thank You! 🎉🏥 {.center}
 
 <center>
-<img src="https://github.com/posit-dev.png" style="border-radius: 25%; margin-bottom: 20px;" width="160px"/>
-
 **You now have everything you need.**
-
-<br>
-
-**GitHub repo:**
-
-```
-https://github.com/philbowsher/Intro-How-to-Use-Posit-AI-Databricks-For-Healthcare-Data-Science
-```
-
-<br>
 
 ::: incremental
 - 💾 Everything you built today is in your own fork — keep it, share it, build on it
