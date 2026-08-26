@@ -65,7 +65,7 @@ KPI dashboard with interactive charts.
 Render with Quarto.
 
 ### Workflow 3: `app.py`
-Reactive web app with live filters (Shiny for Python). **The pacing bottleneck of this workshop** — reactive programming (`@reactive.calc`, `@render.ui`) is the first genuinely new programming model, budget extra time here.
+Reactive web app with live filters (Shiny for Python). This one updates live as filters change, so it takes a bit longer than the others — build it one piece at a time.
 
 **Ask Posit Assistant**, at the marker in each section:
 > "Build the sidebar with filters for Priority and Specialty (dropdowns with an 'All' option), and a checkbox group for Hospital Sites."

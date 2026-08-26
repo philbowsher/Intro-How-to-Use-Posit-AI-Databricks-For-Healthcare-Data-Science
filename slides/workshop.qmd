@@ -324,21 +324,9 @@ Databricks + Posit Workshop
 
 ---
 
-# Workflow 3 is the bottleneck {.center}
+## Workflow 3: app.py ⚡ ⏱ ~30-35 min
 
-::: r-fit-text
-⚡ **Budget extra time here**
-:::
-
-**Reactive programming (`@reactive.calc`, `@render.ui`) is the first genuinely new programming model today — Workflows 1/2/4 are mostly "describe a chart, get a chart."** ⏱ ~30-35 min
-
-::: footer
-Databricks + Posit Workshop
-:::
-
----
-
-## Workflow 3: app.py ⚡ ⏱ ~30-35 min — the bottleneck
+**This one's a bit different — it updates live as you change the filters, so take it slower and build it one piece at a time.**
 
 **Sidebar, KPIs, and charts are marked with comments — build them one at a time, not all at once.**
 
