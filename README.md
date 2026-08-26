@@ -26,7 +26,7 @@ A workshop demonstrating how to build clinical analytics applications using Data
    - Workspace URL (e.g., `dbc-xxxx.cloud.databricks.com`)
    - SQL Warehouse HTTP Path (e.g., `/sql/1.0/warehouses/xxxxxxxx`)
    - Personal Access Token (PAT)
-4. **Make sure you have a `.venv`.** If you used File → New Project → Python to create this project, Positron already made one for you. If you opened an existing folder instead, create one now: `python3.14 -m venv .venv`, then set Positron's Python interpreter (top-right) to it. `.env` and the R workflow both assume this exists — `scripts/check_packages.py` (next step) checks for it and tells you exactly what to do if it's missing.
+4. **Make sure you have a `.venv`.** If you used File → New Project → Python to create this project, Positron already made one for you. If you opened an existing folder instead, create one now: `python3.14 -m venv .venv`, then set Positron's Python interpreter (top-right) to it — this is what Positron's **Render** button actually uses, separately from `QUARTO_PYTHON` in `.env`. `.env` and the R workflow both assume `.venv` exists — `scripts/check_packages.py` (next step) checks for it and tells you exactly what to do if it's missing.
 5. **Create your `.env` file** — ask Posit Assistant:
    > "Create a `.env` file in my project root with fields DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN, and QUARTO_PYTHON=.venv/bin/python. Leave the values blank — I'll fill them in."
 
