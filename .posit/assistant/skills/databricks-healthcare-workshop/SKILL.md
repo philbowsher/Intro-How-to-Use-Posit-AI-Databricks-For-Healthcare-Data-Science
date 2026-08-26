@@ -73,6 +73,8 @@ Tested finding: prompting Assistant for interactive Plotly charts inside `app.py
 
 This machine (and possibly a student's) can have several Python interpreters — the one Positron's console uses, the one a bare `python3` in a terminal resolves to, and `.venv`'s. They aren't guaranteed to be the same. "I ran `check_packages.py` and it passed" only guarantees packages are installed for *that* interpreter. If something imports fine in one place but not another, check `sys.executable` in both rather than assuming the package check was wrong.
 
+Confirmed the same is true for R: the console's `.libPaths()` can differ from what `Rscript`/bash used, so a package installed via `scripts/check_packages.R` from a terminal may still show `FALSE` for `requireNamespace()` in the actual console until that console's `.libPaths()` includes the same library. Same fix as Python: check where the *actual* console is looking, don't assume a passing script means the visible session has it too.
+
 ## If a package was installed after a console/kernel was already running
 
 Restart the console/kernel before assuming an import failure means something's actually broken. Two real causes of this, tested: (1) a package installed to user site-packages isn't always visible to an already-running interpreter's `sys.path`; (2) Plotly specifically caches "not importable" for optional deps like `nbformat` the first time it checks, and won't re-check after a later install in the same session. Restarting fixes both — don't debug import internals first.
