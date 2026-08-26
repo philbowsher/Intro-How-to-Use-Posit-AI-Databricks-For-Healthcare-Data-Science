@@ -34,8 +34,10 @@ equivalent: it's reproducible without needing a special index URL.
 """
 
 import importlib
+import importlib.util
 import subprocess
 import sys
+from pathlib import Path
 
 # Exact versions confirmed to install together cleanly on Python 3.14.2
 # (see tested finding above). Pin format is "distribution==version"; the
@@ -53,6 +55,12 @@ REQUIRED_PACKAGES = {
     "nbconvert==7.17.1": "nbconvert",
     "ipykernel==7.3.0": "ipykernel",
     "pandera==0.32.1": "pandera",
+    # Tested finding: needed for interactive Plotly charts inside Shiny for
+    # Python (app.py's Workflow 3 prompts) via shinywidgets.render_plotly /
+    # render_widget. Missing from an earlier version of this list -- a
+    # student following the scripted prompts hit ModuleNotFoundError with
+    # nothing catching it first.
+    "shinywidgets==0.8.1": "shinywidgets",
     # Tested finding (2026-08-26): Quarto's Jupyter engine imports pyyaml
     # internally (share/jupyter/jupyter.py -> notebook.py) to parse notebook
     # metadata. It's not a package this workshop's code imports directly,
@@ -64,6 +72,82 @@ REQUIRED_PACKAGES = {
 }
 
 REQUIRED_PYTHON = (3, 14)
+
+# Tested finding: `shiny` and `streamlit` install a CLI command as part of
+# their package -- but on a non-writable Python (no .venv, no sudo), pip
+# silently falls back to a --user install, and that command's script often
+# lands in ~/.local/bin, which isn't on PATH. check_and_install() reporting
+# "installed" doesn't mean `streamlit run ...` (the exact command the
+# workshop tells you to type) will actually be found by your shell.
+CLI_COMMANDS = {"shiny": "shiny", "streamlit": "streamlit"}
+
+
+def check_venv() -> None:
+    """Tested finding: nothing in this workshop forces a .venv to exist, but
+    three separate things silently assume one does: QUARTO_PYTHON=.venv/bin/python
+    in .env, and the hardcoded use_python(getwd()/.venv/bin/python) call in
+    both new_analysis_r.qmd and Dashboard_r.qmd. A student who opens this
+    folder directly (rather than using Positron's File > New Project > Python,
+    which creates .venv automatically) will hit confusing failures in three
+    unrelated places later, with no single clear error pointing back here.
+    """
+    venv_python = Path(".venv") / "bin" / "python"
+    in_venv = sys.prefix != sys.base_prefix
+
+    if not venv_python.exists():
+        print(
+            "[warning] No .venv found at .venv/bin/python. This project's .env "
+            "(QUARTO_PYTHON=.venv/bin/python) and both R/reticulate documents "
+            "(new_analysis_r.qmd, Dashboard_r.qmd) hardcode this path and will fail "
+            "without it. Create one now, then re-run this script from inside it:\n"
+            "             python3.14 -m venv .venv\n"
+            "             .venv/bin/python scripts/check_packages.py\n"
+            "           Or use Positron's File > New Project > Python, which creates "
+            "and selects .venv for you automatically.\n"
+        )
+    elif not in_venv:
+        print(
+            "[info]    .venv exists, but this script isn't currently running inside it. "
+            "Set Positron's Python interpreter (top-right corner) to .venv before continuing.\n"
+        )
+    else:
+        print("[ok]      Running inside .venv.\n")
+
+
+def check_cli_commands() -> None:
+    """Tested finding: checking shutil.which(command) against the *system*
+    PATH is unreliable here -- a stale, unrelated install elsewhere on PATH
+    can make this report a false "ok" for a command that has nothing to do
+    with this project's .venv. What actually matters is whether the script
+    written into THIS .venv (.venv/bin/<command>) is reachable, which means
+    checking whether .venv/bin itself is on PATH, not just whether *some*
+    command by that name resolves anywhere on the system.
+    """
+    import os
+
+    venv_bin = Path(".venv") / "bin"
+    path_dirs = os.environ.get("PATH", "").split(os.pathsep)
+    venv_bin_on_path = str(venv_bin.resolve()) in [
+        str(Path(p).resolve()) for p in path_dirs if p
+    ]
+
+    for module_name, command in CLI_COMMANDS.items():
+        if importlib.util.find_spec(module_name) is None:
+            continue  # not installed at all -- already reported above
+        venv_script = venv_bin / command
+        if not venv_script.exists():
+            continue  # installed but not via this .venv -- nothing to check here
+        if venv_bin_on_path:
+            print(f"[ok]      `{command}` found in .venv/bin, and .venv/bin is on PATH")
+        else:
+            print(
+                f"[warning] `{command}` exists at .venv/bin/{command}, but .venv/bin isn't on "
+                f"PATH in this shell -- a bare `{command} run ...` (what the workshop tells you "
+                f"to run) may resolve to a different, unrelated install elsewhere on PATH, or "
+                f"fail entirely. Activate the venv first (e.g. `source .venv/bin/activate`), or "
+                f"run `.venv/bin/{command} run ...` / `.venv/bin/python -m {command} run ...` "
+                f"explicitly."
+            )
 
 
 def check_python_version() -> None:
@@ -163,6 +247,9 @@ def check_quarto() -> None:
 
 if __name__ == "__main__":
     check_python_version()
+    check_venv()
     check_and_install()
+    print()
+    check_cli_commands()
     print()
     check_quarto()

@@ -25,7 +25,14 @@ execute:
 library(reticulate)
 library(dplyr)
 
-use_python(file.path(getwd(), ".venv", "bin", "python"), required = TRUE)
+venv_python <- file.path(getwd(), ".venv", "bin", "python")
+if (!file.exists(venv_python)) {
+  stop(
+    "No .venv found at ", venv_python, ". Create it first: python3.14 -m venv .venv, ",
+    "then run `python scripts/check_packages.py` to install the required packages into it."
+  )
+}
+use_python(venv_python, required = TRUE)
 
 # import_from_path(), not sys.path manipulation -- see new_analysis_r.qmd's
 # AI instructions block for why.

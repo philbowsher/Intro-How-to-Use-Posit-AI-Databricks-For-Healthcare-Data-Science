@@ -53,6 +53,22 @@ Internally this uses `pl.DataFrame(cur.fetchall(), schema=[...], orient="row")` 
 
 **`pandera.polars` schema validation can false-positive on integer bit width.** `Days_Waiting` may come back as Polars `Int32` or `Int64` depending on the code path (e.g. a raw SQL round-trip vs. `pl.DataFrame(cur.fetchall(), orient="row")`), and `pandera.polars` fails strict dtype checks on an exact width mismatch even though both are valid integers. Use `pa.Column(int, ..., coerce=True)` (already done in `validation/validate_data.py`) rather than treating this as a real data-quality issue.
 
+## `.venv` is assumed by three separate things — check it exists, don't assume
+
+Tested finding (real student dry run, no `.venv` created): `QUARTO_PYTHON=.venv/bin/python` in `.env`, and the hardcoded `use_python(getwd()/.venv/bin/python)` call in both `new_analysis_r.qmd` and `Dashboard_r.qmd`, all silently assume `.venv` exists. If a student opens this folder directly instead of using Positron's File > New Project > Python (which creates `.venv` automatically), all three break with unrelated-looking errors. `scripts/check_packages.py` and `scripts/check_packages.R` now both check for `.venv/bin/python` explicitly and print a clear fix rather than letting this surface downstream. The R docs now also `stop()` with a clear message instead of reticulate's raw error if it's missing.
+
+## Installed CLI commands (`shiny`, `streamlit`) can exist but not be on PATH
+
+Tested finding: checking `shutil.which("streamlit")` against the system PATH is unreliable — a stale, unrelated install elsewhere on PATH can produce a false "ok" that has nothing to do with this project's `.venv`. What matters is whether `.venv/bin` itself is on PATH (i.e., whether the venv is activated) — `scripts/check_packages.py` checks that specifically now. If `.venv/bin` isn't on PATH, a bare `streamlit run app_streamlit.py` may fail or silently run a different install; use `.venv/bin/streamlit run ...` or `source .venv/bin/activate` first.
+
+## R side has no package-check infrastructure of its own — now fixed
+
+Tested finding: nothing checked whether `reticulate` (or `dplyr`/`ggplot2`/`gt`) were installed before a student hit `new_analysis_r.qmd`/`Dashboard_r.qmd` — only `check_packages.py` (Python) existed. `scripts/check_packages.R` now covers this, including falling back to a user library (`R_LIBS_USER`) if the system R library isn't writable (the same "no sudo" problem `check_packages.py` sidesteps via pip's own fallback, made explicit here).
+
+## `shinywidgets` is required for Workflow 3's interactive Plotly-in-Shiny
+
+Tested finding: prompting Assistant for interactive Plotly charts inside `app.py` (Workflow 3) produces code depending on `shinywidgets` (`render_plotly`/`render_widget`), which wasn't in `check_packages.py`'s list — a student following the scripted prompts hit `ModuleNotFoundError` with nothing catching it first. Now included (`shinywidgets==0.8.1`).
+
 ## Deploying to Posit Connect — two non-interoperable paths
 
 If a document gets deployed (e.g. after the Dashboard step), there are two separate, non-interoperable ways to do it: Positron's Publisher UI ("Publish" button) and the `rsconnect-python` package/CLI. **Ask which one the user wants before starting** — don't assume. If someone already clicked "Publish" and it's incomplete, check for a leftover config file before starting a fresh `rsconnect`-driven deployment from scratch.

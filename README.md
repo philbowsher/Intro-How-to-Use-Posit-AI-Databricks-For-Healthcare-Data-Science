@@ -26,17 +26,17 @@ A workshop demonstrating how to build clinical analytics applications using Data
    - Workspace URL (e.g., `dbc-xxxx.cloud.databricks.com`)
    - SQL Warehouse HTTP Path (e.g., `/sql/1.0/warehouses/xxxxxxxx`)
    - Personal Access Token (PAT)
-4. **Create your `.env` file:**
-   ```bash
-   cp .env.example .env
-   ```
-   Then fill in your Databricks credentials in `.env`
-5. **Check your packages:**
+4. **Make sure you have a `.venv`.** If you used File → New Project → Python to create this project, Positron already made one for you. If you opened an existing folder instead, create one now: `python3.14 -m venv .venv`, then set Positron's Python interpreter (top-right) to it. `.env` and the R workflow both assume this exists — `scripts/check_packages.py` (next step) checks for it and tells you exactly what to do if it's missing.
+5. **Create your `.env` file** — ask Posit Assistant:
+   > "Create a `.env` file in my project root with fields DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN, and QUARTO_PYTHON=.venv/bin/python. Leave the values blank — I'll fill them in."
+
+   Then open the new `.env` file and type in your real credentials. (If you're comfortable with a terminal, `cp .env.example .env` does the same thing.)
+6. **Check your packages:**
    ```bash
    python scripts/check_packages.py
    ```
-   This is infrastructure, not a prompting exercise — just run it. It checks everything the workshop needs and installs anything missing, one package at a time, with a specific hint if something fails.
-6. **Materialize the dataset:**
+   This is infrastructure, not a prompting exercise — just run it. It checks everything the workshop needs and installs anything missing, one package at a time, with a specific hint if something fails — including whether `.venv` exists and whether `shiny`/`streamlit`'s commands will actually be found when you run them later.
+7. **Materialize the dataset:**
    ```bash
    python scripts/databricks_setup.py
    ```
@@ -88,13 +88,14 @@ Workflows 1–2 have R-first twins — `new_analysis_r.qmd` and `Dashboard_r.qmd
 
 These are separate files from the Python versions, not mixed R/Python chunks in one document. Only Workflows 1–2 have this path — Shiny-for-Python and Streamlit are Python-native web runtimes with no meaningful "R via reticulate" equivalent.
 
-Requires `reticulate` (R) pointed at this project's `.venv` — see `.posit/assistant/skills/databricks-healthcare-workshop/SKILL.md` for the tested setup recipe and a couple of non-obvious reticulate/Polars conversion gotchas.
+Run `Rscript scripts/check_packages.R` first — it checks `reticulate`, `dplyr`, `ggplot2`, and `gt` are installed (falling back to a personal R library if the system one isn't writable), and confirms `.venv` exists before you hit the R documents. See `.posit/assistant/skills/databricks-healthcare-workshop/SKILL.md` for the tested reticulate setup recipe and a couple of non-obvious reticulate/Polars conversion gotchas.
 
 ---
 
 ## Shared Infrastructure
 
-- `scripts/check_packages.py` — checks/installs pinned package versions, checks Python version and Quarto's `QUARTO_PYTHON` setup
+- `scripts/check_packages.py` — checks/installs pinned package versions, checks Python version, `.venv` existence, and whether `shiny`/`streamlit`'s commands will actually be found on PATH
+- `scripts/check_packages.R` — R-side equivalent for the reticulate workflow (`reticulate`, `dplyr`, `ggplot2`, `gt`)
 - `scripts/databricks_setup.py` — one-time connection + data materialization into `data/waiting_list.parquet` (`--refresh` to force a live re-query)
 - `scripts/databricks_helpers.py` — shared connection/query logic (`load_waiting_list()`, `RTT_THRESHOLD`) used by every working document, so the same ~15-line Databricks boilerplate isn't re-pasted into each file
 - `scripts/create_workshop_docs.py` — the deterministic scaffold script that generated `Dashboard.qmd`, `app.py`, `app_streamlit.py` (safe to re-run — skips files that already exist)

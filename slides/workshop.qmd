@@ -10,8 +10,6 @@ format:
     progress: true
     title-slide-attributes:
       data-background-color: white
-      data-background-image: figures/sample-title-slide-option-1.png
-      data-background-size: contain
     footer: "Databricks + Posit Workshop · NHS Wales Clinical Analytics"
 execute:
   echo: false
@@ -61,15 +59,16 @@ Databricks + Posit Workshop
 
 ---
 
-## Why Posit Assistant, specifically, for Databricks 🤖
+## Why Posit Assistant 🤖
 
-**This is the thing to walk away remembering.**
+**Remember this one thing:**
+
+Posit Assistant connects to Databricks and knows what to do — it does your job with you.
 
 ::: incremental
-- It reads your `.env` safely via `os.getenv()` — your token never appears in a prompt
-- It writes the Databricks connect/query boilerplate so you don't memorize the three-tier catalog namespace
-- It can read a live warehouse error message and tell you what's actually wrong
-- It's the same collaborator whether you're in a Python cell or an R cell calling the same backend
+- Writes the connection code
+- Fixes the errors
+- Builds the chart, dashboard, or app you describe
 :::
 
 ::: footer
@@ -78,9 +77,17 @@ Databricks + Posit Workshop
 
 ---
 
-# PHASE 1: Connectivity
+# PHASE 1: Connectivity {.center}
 
-⏱ ~15-20 min for this phase — Databricks signup/PAT/warehouse startup is a wall-clock risk, not a conceptual one
+::: r-fit-text
+🔌 **Connectivity**
+:::
+
+⏱ ~15-20 min — Databricks signup/PAT/warehouse startup is a wall-clock risk, not a conceptual one
+
+::: footer
+Databricks + Posit Workshop
+:::
 
 ---
 
@@ -139,7 +146,15 @@ Databricks + Posit Workshop
 
 ---
 
-# PHASE 2: Environment
+# PHASE 2: Environment {.center}
+
+::: r-fit-text
+🛠️ **Environment**
+:::
+
+::: footer
+Databricks + Posit Workshop
+:::
 
 ---
 
@@ -159,13 +174,35 @@ Databricks + Posit Workshop
 
 ---
 
-## Step 4 — Create Your `.env` 🔐
+## Step 3b — Make Sure You Have a `.venv` 🐍
+
+**If you created this as a New Project (File → New Project → Python), skip this — Positron already made one.**
+
+If you opened an existing folder instead:
 
 ```bash
-cp .env.example .env
+python3.14 -m venv .venv
 ```
 
-Fill in `DATABRICKS_HOST`, `DATABRICKS_HTTP_PATH`, `DATABRICKS_TOKEN`, and `QUARTO_PYTHON=.venv/bin/python`.
+Then set Positron's Python interpreter (top-right corner) to `.venv`.
+
+<div class="warning-box">
+⚠️ Your `.env` file and both R documents hardcode `.venv/bin/python` — skipping this breaks three things later, not just one.
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Step 4 — Create Your `.env` 🔐
+
+**Ask Posit Assistant:**
+
+> "Create a `.env` file in my project root with fields DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN, and QUARTO_PYTHON=.venv/bin/python. Leave the values blank — I'll fill them in."
+
+**Then open the new `.env` file and type in your real credentials.**
 
 <div class="warning-box">
 ⚠️ Never commit `.env` — it's already in `.gitignore`.
@@ -181,7 +218,7 @@ Databricks + Posit Workshop
 
 - Open `scripts/check_packages.py` and run it: `python scripts/check_packages.py`
 - Checks everything the workshop needs and installs anything missing, one package at a time
-- Also checks your Python version and that Quarto can find your interpreter
+- Also checks your Python version, that `.venv` actually exists, and that Quarto can find your interpreter
 - Like the setup script, this is infrastructure — just run it, no prompting
 
 ::: footer
@@ -228,7 +265,15 @@ Databricks + Posit Workshop
 
 ---
 
-# PHASE 3: Workflows
+# PHASE 3: Workflows {.center}
+
+::: r-fit-text
+📋 **Workflows**
+:::
+
+::: footer
+Databricks + Posit Workshop
+:::
 
 ---
 
@@ -279,9 +324,13 @@ Databricks + Posit Workshop
 
 ---
 
-# Workflow 3 is the bottleneck — budget extra time ⏱ ~30-35 min
+# Workflow 3 is the bottleneck {.center}
 
-**Reactive programming (`@reactive.calc`, `@render.ui`) is the first genuinely new programming model today — Workflows 1/2/4 are mostly "describe a chart, get a chart."**
+::: r-fit-text
+⚡ **Budget extra time here**
+:::
+
+**Reactive programming (`@reactive.calc`, `@render.ui`) is the first genuinely new programming model today — Workflows 1/2/4 are mostly "describe a chart, get a chart."** ⏱ ~30-35 min
 
 ::: footer
 Databricks + Posit Workshop
@@ -325,7 +374,7 @@ Databricks + Posit Workshop
 
 ---
 
-#  {background-image="figures/toc-light.png" background-size="contain"}
+# {.center}
 
 ::: r-fit-text
 📑 **Break Time!** 📖
@@ -337,7 +386,11 @@ Databricks + Posit Workshop
 
 ---
 
-# Choose Your Language: Python or R (via reticulate)
+# Choose Your Language {.center}
+
+::: r-fit-text
+🐍 **Python** or **R** via reticulate
+:::
 
 **Same Databricks backend, same dataset, either language — a live demo of Positron's polyglot IDE.**
 
@@ -348,6 +401,8 @@ Databricks + Posit Workshop
 ---
 
 ## R via reticulate ⏱ ~15-20 min (optional path)
+
+**First:** `Rscript scripts/check_packages.R` — installs `reticulate`, `dplyr`, `ggplot2`, `gt` and confirms your `.venv` exists.
 
 **`new_analysis_r.qmd` and `Dashboard_r.qmd` are R-first twins of Workflows 1–2 — not a mixed-language file.**
 
@@ -391,7 +446,15 @@ Databricks + Posit Workshop
 
 ---
 
-# Reference Material
+# Reference Material {.center}
+
+::: r-fit-text
+📚 **Reference Material**
+:::
+
+::: footer
+Databricks + Posit Workshop
+:::
 
 ---
 
@@ -502,7 +565,11 @@ Databricks + Posit Workshop
 
 ---
 
-# Done!
+# Done! {.center}
+
+::: r-fit-text
+🎉 **Done!**
+:::
 
 ::: footer
 Databricks + Posit Workshop

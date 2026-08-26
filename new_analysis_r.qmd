@@ -66,7 +66,15 @@ library(dplyr)
 
 # Point reticulate at this project's Python venv -- tested working recipe:
 # use_python(..., required = TRUE) called before any other reticulate call.
-use_python(file.path(getwd(), ".venv", "bin", "python"), required = TRUE)
+venv_python <- file.path(getwd(), ".venv", "bin", "python")
+if (!file.exists(venv_python)) {
+  stop(
+    "No .venv found at ", venv_python, ". Create it first: python3.14 -m venv .venv, ",
+    "then run `python scripts/check_packages.py` to install the required packages into it. ",
+    "(Run scripts/check_packages.R first if you haven't already -- it checks for this too.)"
+  )
+}
+use_python(venv_python, required = TRUE)
 
 # import_from_path(), not manual sys.path$insert() -- tested gotcha: reticulate
 # auto-converts sys$path to a plain R character vector, so $insert() on it
