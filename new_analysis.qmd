@@ -20,50 +20,38 @@ execute:
 
 <!--
 ═══════════════════════════════════════════════════════════════════════════════
-  AI INSTRUCTIONS FOR POSITRON ASSISTANT
+  AI INSTRUCTIONS FOR POSIT ASSISTANT
 ═══════════════════════════════════════════════════════════════════════════════
 
-  This is a Quarto document template for NHS clinical analytics using
-  Databricks SQL + Polars + Plotly.
+  This is a Quarto document template for NHS Wales clinical analytics using
+  the shared Databricks connection helper (scripts/databricks_helpers.py),
+  Polars, and Plotly.
 
-  ENVIRONMENT:
-  - Python 3.x, Quarto 1.9+
-  - Credentials loaded from .env (DATABRICKS_HOST, DATABRICKS_HTTP_PATH,
-    DATABRICKS_TOKEN)
-  - Available packages: polars, plotly, databricks-sql-connector, python-dotenv
-
-  AVAILABLE DATABRICKS CATALOGS (confirmed live):
-  - samples   → sample datasets (accuweather, nyctaxi, tpch, etc.)
-  - system    → Unity Catalog metadata (information_schema)
-  - workspace → your workspace tables
-
-  STYLE CONVENTIONS:
-  - Use Polars (not pandas) for all data manipulation
-  - Use Plotly Express / Graph Objects for all charts
-  - Each chart should be a separate labelled code cell
-  - Use pl.DataFrame(cur.fetchall(), schema=[...], orient="row") to load results
-  - The conn object is created in the setup cell — reuse it across cells
-  - Close the connection in the teardown cell
+  The Setup chunk below already loads the waiting-list dataset into `df`
+  (columns: Hospital, Specialty, Days_Waiting, Priority, Pathway) via
+  load_waiting_list() -- from the local cache if scripts/databricks_setup.py
+  has already been run, or live from Databricks otherwise. Don't rewrite
+  this connection/load logic -- build analysis and charts from `df`.
 
   HOW TO USE THIS TEMPLATE:
   1. Fill in the YAML title/subtitle/author above
-  2. Replace the placeholder SQL in section 2 with your actual query
-  3. Add analysis sections between "Data" and "Teardown"
-  4. Ask Positron Assistant to help with any section by selecting it and
-     pressing Cmd/Ctrl+I
+  2. Work through each section below in order, asking Posit Assistant to
+     write the code for that section, then run the chunk it inserts
+  3. Sections below are headers only, on purpose -- there's no placeholder
+     chunk to edit. Assistant inserts a real chunk when you prompt it.
 
-  EXAMPLE PROMPT FOR POSITRON ASSISTANT:
+  EXAMPLE PROMPT FOR POSIT ASSISTANT:
   "Using the df DataFrame loaded above, create a Plotly bar chart showing
-   average waiting days by hospital site, with a dashed red line at 126 days
-   (NHS 18-week RTT target). Use NHS blue (#005EB8) as the bar colour."
+   average waiting days by hospital, with a dashed red line at RTT_THRESHOLD
+   (126 days, the NHS 18-week RTT target). Use NHS blue (#005EB8) for the bars."
 
 ═══════════════════════════════════════════════════════════════════════════════
 -->
 
 ## Overview
 
-<!-- AI: Write a 2–3 sentence description of what this document analyses,
-     what data source it uses, and what the key findings are. -->
+<!-- Ask Posit Assistant: "Write a 2-3 sentence description of what this
+     document analyses, using df's columns and RTT_THRESHOLD." -->
 
 ---
 
@@ -73,104 +61,45 @@ execute:
 #| label: setup
 #| output: false
 
-import os
-import polars as pl
-import plotly.express as px
-import plotly.graph_objects as go
-from databricks import sql
-from dotenv import load_dotenv
+import sys
+from pathlib import Path
 
-load_dotenv()
+sys.path.insert(0, str(Path.cwd() / "scripts"))
 
-conn = sql.connect(
-    server_hostname=os.environ["DATABRICKS_HOST"],
-    http_path=os.environ["DATABRICKS_HTTP_PATH"],
-    access_token=os.environ["DATABRICKS_TOKEN"],
-)
+from databricks_helpers import load_waiting_list, RTT_THRESHOLD
 
-print("✓ Connected to Databricks SQL Warehouse")
+df = load_waiting_list()
 ```
 
----
-
-## 1. Data
-
-<!-- AI: Replace the query below with one relevant to the analysis.
-     Use the three-tier Unity Catalog namespace: catalog.schema.table
-     Or use a VALUES clause for synthetic/demo data (no storage required).
-     
-     To explore available data, run:  SHOW CATALOGS;
-                                      SHOW TABLES IN samples;  -->
-
 ```{python}
-#| label: load-data
-
-query = """
--- TODO: Replace with your query
--- Example: explore Databricks sample data
-SELECT * FROM samples.tpch.orders LIMIT 100
-"""
-
-with conn.cursor() as cur:
-    cur.execute(query)
-    df = pl.DataFrame(
-        cur.fetchall(),
-        schema=[desc[0] for desc in cur.description],
-        orient="row",
-    )
+#| label: preview
 
 df.head()
 ```
 
 ---
 
-## 2. Analysis
+## 1. Summary Statistics
 
-<!-- AI: Add analysis cells here. Each section should:
-     - Have a brief markdown explanation before the code
-     - Use a labelled code cell (#| label: ...)
-     - Produce either a Polars DataFrame display or a Plotly figure
-
-     Suggested sections:
-     - Summary statistics
-     - Time trends (line chart)
-     - Group comparisons (bar chart)
-     - Distribution (box plot or histogram)
-     - Data table -->
-
-```{python}
-#| label: summary
-
-# AI: Replace with meaningful aggregation of df
-df.describe()
-```
+<!-- Ask Posit Assistant: "Summarise df -- average, min, and max Days_Waiting
+     overall and by Specialty, using gt or a plain Polars group_by." -->
 
 ---
 
-## 3. Visualisation
+## 2. Visualisation
 
-```{python}
-#| label: fig-main
-
-# AI: Replace with a Plotly chart relevant to the data
-# fig = px.bar(df, x="...", y="...", title="...")
-# fig
-```
+<!-- Ask Posit Assistant: "Create a Plotly bar chart of average waiting days
+     by hospital, with a dashed red line at RTT_THRESHOLD." -->
 
 ---
 
-## Teardown
+## 3. Breach Analysis
 
-```{python}
-#| label: teardown
-#| echo: false
-
-conn.close()
-print("Connection closed.")
-```
+<!-- Ask Posit Assistant: "Show which rows in df breach RTT_THRESHOLD, and
+     what proportion of referrals that represents by specialty." -->
 
 ::: {.callout-note}
 ## Data Privacy
-All queries in this document should return only aggregated or synthetic data
+All queries in this document return only aggregated or synthetic data
 unless appropriate data governance approvals are in place.
 :::

@@ -1,0 +1,117 @@
+---
+title: "[ TITLE — e.g. 'RTT Performance by Specialty' ] (R)"
+subtitle: "[ SUBTITLE — e.g. 'NHS Wales · Referral-to-Treatment Analysis' ]"
+author: "[ YOUR NAME / TEAM ]"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    theme: cosmo
+    code-fold: true
+    code-summary: "Show code"
+    highlight-style: github
+    self-contained: true
+execute:
+  echo: true
+  warning: false
+  error: true
+---
+
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+  AI INSTRUCTIONS FOR POSIT ASSISTANT -- R / reticulate variant
+═══════════════════════════════════════════════════════════════════════════════
+
+  Same workshop, same Databricks-backed dataset as new_analysis.qmd, but
+  written in R -- for attendees who'd rather work in R than Python. R
+  reaches the shared Python connection helper (scripts/databricks_helpers.py)
+  via reticulate, then hands off to R packages (dplyr, ggplot2) for analysis.
+
+  The Setup chunk below already loads the waiting-list dataset into `df`
+  (an R data frame; columns: Hospital, Specialty, Days_Waiting, Priority,
+  Pathway) and RTT_THRESHOLD (126). Don't rewrite the reticulate setup or
+  the Python->R conversion -- build analysis and charts from `df` using
+  normal R idioms (dplyr, ggplot2).
+
+  GOTCHA ALREADY HANDLED IN SETUP, DON'T RE-INTRODUCE IT: converting a
+  Polars DataFrame to R via `$to_pandas()` silently corrupts the data on
+  this stack (pandas 3.x's Arrow-backed string dtype breaks reticulate's
+  conversion, with a warning easy to miss rather than an error). Setup uses
+  `to_dict(as_series = FALSE)` instead, which round-trips cleanly.
+
+  EXAMPLE PROMPT FOR POSIT ASSISTANT:
+  "Using the df data frame loaded above, create a ggplot2 bar chart of
+   average Days_Waiting by Hospital, with a dashed red horizontal line at
+   RTT_THRESHOLD."
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+## Overview
+
+<!-- Ask Posit Assistant: "Write a 2-3 sentence description of what this
+     document analyses, using df's columns and RTT_THRESHOLD." -->
+
+---
+
+## Setup
+
+```{r}
+#| label: setup
+#| output: false
+
+library(reticulate)
+library(dplyr)
+
+# Point reticulate at this project's Python venv -- tested working recipe:
+# use_python(..., required = TRUE) called before any other reticulate call.
+use_python(file.path(getwd(), ".venv", "bin", "python"), required = TRUE)
+
+# import_from_path(), not manual sys.path$insert() -- tested gotcha: reticulate
+# auto-converts sys$path to a plain R character vector, so $insert() on it
+# fails with "$ operator is invalid for atomic vectors". import_from_path()
+# is the idiomatic reticulate way to import a module from a non-package
+# directory without touching sys.path directly.
+dh <- import_from_path("databricks_helpers", path = file.path(getwd(), "scripts"))
+
+df_py <- dh$load_waiting_list()
+RTT_THRESHOLD <- dh$RTT_THRESHOLD
+
+# Tested working conversion (see AI instructions above for why this path,
+# not $to_pandas(), is used):
+df <- as.data.frame(py_to_r(df_py$to_dict(as_series = FALSE)), stringsAsFactors = FALSE)
+```
+
+```{r}
+#| label: preview
+
+head(df)
+```
+
+---
+
+## 1. Summary Statistics
+
+<!-- Ask Posit Assistant: "Summarise df with dplyr -- average, min, and max
+     Days_Waiting overall and by Specialty." -->
+
+---
+
+## 2. Visualisation
+
+<!-- Ask Posit Assistant: "Create a ggplot2 bar chart of average waiting
+     days by hospital, with a dashed red line at RTT_THRESHOLD." -->
+
+---
+
+## 3. Breach Analysis
+
+<!-- Ask Posit Assistant: "Show which rows in df breach RTT_THRESHOLD, and
+     what proportion of referrals that represents by specialty." -->
+
+::: {.callout-note}
+## Data Privacy
+All queries in this document return only aggregated or synthetic data
+unless appropriate data governance approvals are in place.
+:::

@@ -1,0 +1,65 @@
+---
+title: "NHS Wales · Clinical Access & Performance (R)"
+subtitle: "Referral-to-Treatment Intelligence Dashboard"
+author: "Clinical Intelligence Unit"
+date: today
+format:
+  dashboard:
+    orientation: rows
+    theme: cosmo
+    scrolling: true
+execute:
+  echo: false
+  warning: false
+---
+
+<!-- R / reticulate variant of Dashboard.qmd -- see new_analysis_r.qmd's AI
+     instructions block for the tested reticulate setup/conversion pattern;
+     it's not repeated in full here. Ask Posit Assistant to write the code
+     for each row below using dplyr/ggplot2, then run the chunk it inserts. -->
+
+```{r}
+#| label: setup
+#| output: false
+
+library(reticulate)
+library(dplyr)
+
+use_python(file.path(getwd(), ".venv", "bin", "python"), required = TRUE)
+
+# import_from_path(), not sys.path manipulation -- see new_analysis_r.qmd's
+# AI instructions block for why.
+dh <- import_from_path("databricks_helpers", path = file.path(getwd(), "scripts"))
+
+df_py <- dh$load_waiting_list()
+RTT_THRESHOLD <- dh$RTT_THRESHOLD
+df <- as.data.frame(py_to_r(df_py$to_dict(as_series = FALSE)), stringsAsFactors = FALSE)
+```
+
+## Row {height="150px"}
+
+<!-- Ask Posit Assistant: "Add 4 KPI value boxes here -- Total Referrals, Average Wait Days,
+     Max Wait, and 18-Week Breaches (>126 days) -- using the df data frame loaded above." -->
+
+## Row {height="420px"}
+
+### Column {width=58%}
+
+<!-- Ask Posit Assistant: "Add a ggplot2 horizontal bar chart of average waiting days by
+     hospital, with a dashed red line at RTT_THRESHOLD." -->
+
+### Column {width=42%}
+
+<!-- Ask Posit Assistant: "Add a ggplot2 donut or pie chart of referral counts by priority level." -->
+
+## Row {height="420px"}
+
+### Column {width=55%}
+
+<!-- Ask Posit Assistant: "Add a ggplot2 box plot of wait times by specialty, with a dashed
+     red line at RTT_THRESHOLD." -->
+
+### Column {width=45%}
+
+<!-- Ask Posit Assistant: "Add a gt table of the full waiting list, colour-coding rows
+     that breach RTT_THRESHOLD." -->

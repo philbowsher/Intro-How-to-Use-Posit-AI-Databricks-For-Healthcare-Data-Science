@@ -1,0 +1,60 @@
+---
+title: "NHS Wales · Clinical Access & Performance"
+subtitle: "Referral-to-Treatment Intelligence Dashboard"
+author: "Clinical Intelligence Unit"
+date: today
+format:
+  dashboard:
+    orientation: rows
+    theme: cosmo
+    scrolling: true
+execute:
+  echo: false
+  warning: false
+---
+
+<!-- Ask Posit Assistant to write the code for each row below, then run the chunk it inserts. -->
+<!-- This setup chunk makes the document self-contained: it loads the waiting-list data even if -->
+<!-- you open this file fresh, without needing to re-run scripts/databricks_setup.py first. -->
+
+```{python}
+#| label: setup
+#| output: false
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path.cwd() / "scripts"))
+
+from databricks_helpers import load_waiting_list, RTT_THRESHOLD
+
+df = load_waiting_list()
+```
+
+## Row {height="150px"}
+
+<!-- Ask Posit Assistant: "Add 4 KPI value boxes here -- Total Referrals, Average Wait Days,
+     Max Wait, and 18-Week Breaches (>126 days) -- using the df DataFrame loaded above." -->
+
+## Row {height="420px"}
+
+### Column {width=58%}
+
+<!-- Ask Posit Assistant: "Add a Plotly horizontal bar chart of average waiting days by
+     hospital, with a dashed red line at the 126-day RTT_THRESHOLD." -->
+
+### Column {width=42%}
+
+<!-- Ask Posit Assistant: "Add a Plotly donut chart of referral counts by priority level." -->
+
+## Row {height="420px"}
+
+### Column {width=55%}
+
+<!-- Ask Posit Assistant: "Add a Plotly box plot of wait times by specialty, with a dashed
+     red line at RTT_THRESHOLD." -->
+
+### Column {width=45%}
+
+<!-- Ask Posit Assistant: "Add a Plotly table of the full waiting list, colour-coding rows
+     that breach RTT_THRESHOLD." -->
