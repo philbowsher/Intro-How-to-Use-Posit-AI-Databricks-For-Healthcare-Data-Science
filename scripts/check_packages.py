@@ -162,6 +162,7 @@ def check_python_version() -> None:
     """
     current = sys.version_info[:2]
     print(f"Python interpreter: {sys.executable} (version {sys.version.split()[0]})")
+    print("(Make sure this matches the interpreter Positron's console, Quarto, and your terminal all use.)")
     if current < REQUIRED_PYTHON:
         print(
             f"[warning] This project expects Python >= {REQUIRED_PYTHON[0]}.{REQUIRED_PYTHON[1]}, "
@@ -224,6 +225,10 @@ def check_and_install() -> None:
         print("Still missing:", ", ".join(failed), "-- see hints above.")
     else:
         print("All packages now installed.")
+        print(
+            "If you already had a Python console/kernel open before running this, restart it "
+            "now -- a running session doesn't always see packages installed after it started."
+        )
 
 
 def check_quarto() -> None:

@@ -69,6 +69,18 @@ Tested finding: nothing checked whether `reticulate` (or `dplyr`/`ggplot2`/`gt`)
 
 Tested finding: prompting Assistant for interactive Plotly charts inside `app.py` (Workflow 3) produces code depending on `shinywidgets` (`render_plotly`/`render_widget`), which wasn't in `check_packages.py`'s list — a student following the scripted prompts hit `ModuleNotFoundError` with nothing catching it first. Now included (`shinywidgets==0.8.1`).
 
+## Multiple Python interpreters can be in play at once
+
+This machine (and possibly a student's) can have several Python interpreters — the one Positron's console uses, the one a bare `python3` in a terminal resolves to, and `.venv`'s. They aren't guaranteed to be the same. "I ran `check_packages.py` and it passed" only guarantees packages are installed for *that* interpreter. If something imports fine in one place but not another, check `sys.executable` in both rather than assuming the package check was wrong.
+
+## If a package was installed after a console/kernel was already running
+
+Restart the console/kernel before assuming an import failure means something's actually broken. Two real causes of this, tested: (1) a package installed to user site-packages isn't always visible to an already-running interpreter's `sys.path`; (2) Plotly specifically caches "not importable" for optional deps like `nbformat` the first time it checks, and won't re-check after a later install in the same session. Restarting fixes both — don't debug import internals first.
+
+## Plotly rendering — use the pattern this workshop already uses, not `fig.show()`
+
+Every `.qmd`/dashboard document renders a figure by making it the last expression in a cell (Quarto's Jupyter engine displays it automatically) — that's already correct and needs no renderer configuration. Don't suggest `fig.show()` as a fix for "nothing displayed" — its default renderer opens a browser tab, which does nothing useful in a non-interactive or headless context. Static image export (`fig.write_image(...)`) additionally pulls in `kaleido`, which needs a full headless-Chromium install — heavier than it looks; avoid suggesting it unless actually needed.
+
 ## Deploying to Posit Connect — two non-interoperable paths
 
 If a document gets deployed (e.g. after the Dashboard step), there are two separate, non-interoperable ways to do it: Positron's Publisher UI ("Publish" button) and the `rsconnect-python` package/CLI. **Ask which one the user wants before starting** — don't assume. If someone already clicked "Publish" and it's incomplete, check for a leftover config file before starting a fresh `rsconnect`-driven deployment from scratch.
