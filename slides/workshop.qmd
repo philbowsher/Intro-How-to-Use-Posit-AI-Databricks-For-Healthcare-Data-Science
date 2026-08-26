@@ -348,7 +348,7 @@ Databricks + Posit Workshop
 
 If reactive wiring isn't clicking, ask Posit Assistant to explain the specific chunk it just wrote before moving to the next section — don't stack unexplained reactive code.
 
-Run `shiny run app.py`.
+Run `source .venv/bin/activate && shiny run app.py` (activating first avoids a "command not found" some students will otherwise hit).
 
 ::: footer
 Databricks + Posit Workshop
@@ -364,7 +364,7 @@ Databricks + Posit Workshop
 
 > "Add reactive metrics showing breaches at the selected target, the delta vs. the 126-day baseline, and estimated additional FTE using: breaches × 45 / (7.5 × 60 × 5 × 48)."
 
-Run `streamlit run app_streamlit.py`.
+Run `source .venv/bin/activate && streamlit run app_streamlit.py`.
 
 *If time permits: try the alternate build in `streamlit_app/app.py`, or add a 5th chart to whichever workflow you finished first.*
 

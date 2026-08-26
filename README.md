@@ -70,7 +70,7 @@ Reactive web app with live filters (Shiny for Python). **The pacing bottleneck o
 **Ask Posit Assistant**, at the marker in each section:
 > "Build the sidebar with filters for Priority and Specialty (dropdowns with an 'All' option), and a checkbox group for Hospital Sites."
 
-Run with: `shiny run app.py`
+Run with (activate your venv first, or `shiny`/`streamlit` commands may not be found): `source .venv/bin/activate && shiny run app.py`
 
 ### Workflow 4: `app_streamlit.py`
 What-if capacity planner (Streamlit).
@@ -78,7 +78,7 @@ What-if capacity planner (Streamlit).
 **Ask Posit Assistant**, at the marker in each section:
 > "Add a sidebar slider to adjust RTT wait targets (14–126 days), then reactive metrics showing breaches at target, delta vs the 126-day baseline, and estimated additional FTE staff needed (formula: breaches × 45 / (7.5 × 60 × 5 × 48))."
 
-Run with: `streamlit run app_streamlit.py`
+Run with: `source .venv/bin/activate && streamlit run app_streamlit.py`
 
 ---
 
