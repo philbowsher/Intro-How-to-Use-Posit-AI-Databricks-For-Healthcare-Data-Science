@@ -47,10 +47,10 @@ Databricks + Posit Workshop
 ::: incremental
 - 1. Get your Databricks workspace + credentials
 - 2. Fork the repo, open it in Positron
-- 3. Check your packages & materialize the dataset (run, don't prompt)
-- 4. Fill in each working document, section by section, with Posit Assistant
-- 5. Turn one document into a live dashboard
-- 6. Choose your language: Python-native, or the same backend via R + reticulate
+- 3. Choose your language: Python-native, or the same backend via R + reticulate
+- 4. Check your packages & materialize the dataset (run, don't prompt)
+- 5. Fill in each working document, section by section, with Posit Assistant
+- 6. Turn one document into a live dashboard
 :::
 
 ::: footer
@@ -83,24 +83,6 @@ Databricks + Posit Workshop
 2. Credentials always in `.env`
 3. `solutions/` = everything ready to run if you get stuck
 4. If stuck, ask me to regenerate code — don't debug alone
-
-::: footer
-Databricks + Posit Workshop
-:::
-
----
-
-## Choose Your Language (decide now) 🐍
-
-**Everything today can be built in Python, or in R using the same Databricks data via `reticulate`.**
-
-- Python is the default path for all four workflows
-- R has its own version of Workflows 1–2 (more on this later)
-- Same data, same Databricks backend, either way
-
-<div class="tip-box">
-💡 If you're an R user, this matters for setup too — you'll also run `Rscript scripts/check_packages.R`.
-</div>
 
 ::: footer
 Databricks + Posit Workshop
@@ -215,6 +197,24 @@ Databricks + Posit Workshop
 
 <div class="warning-box">
 ⚠️ Never commit `.env` — it's already in `.gitignore`.
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Choose Your Language (decide now) 🐍
+
+**Everything today can be built in Python, or in R using the same Databricks data via `reticulate`.**
+
+- Python is the default path for all four workflows
+- R has its own version of Workflows 1–2 (more on this later)
+- Same data, same Databricks backend, either way
+
+<div class="tip-box">
+💡 If you're an R user, this matters for the next step too — you'll also run `Rscript scripts/check_packages.R`.
 </div>
 
 ::: footer
@@ -533,8 +533,8 @@ https://github.com/philbowsher/Intro-How-to-Use-Posit-AI-Databricks-For-Healthca
 <br>
 
 ::: incremental
-- 🍴 Fork the repo · Clone locally · Open in Positron
-- 📁 Run `solutions/` anytime to see working examples
+- 💾 Everything you built today is in your own fork — keep it, share it, build on it
+- 📁 Come back to `solutions/` anytime to see working examples
 - 🤖 Ask me (Posit Assistant) for any modifications or new analyses
 - 🚀 Next session: Adding AI with chatlas + querychat on Databricks
 :::
