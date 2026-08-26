@@ -9,8 +9,8 @@ Run it with:  python scripts/check_packages.py
 (from your project root, with your .venv's Python active)
 
 Environment this was built/tested against (to replicate in a new session):
-  Python 3.14.2, pip installing from PyPI (no dated snapshot needed here --
-  see note below on why that's a genuine difference from an R/CRAN workflow).
+  Python 3.14.2, pip installing from Posit Package Manager's Python mirror
+  (see PPM_PYPI_INDEX below), not directly from PyPI.
 
 Tested finding (2026-08-26): every package below has a prebuilt wheel for
 Python 3.14 on manylinux (cp314 wheels exist for pyarrow, pydantic-core,
@@ -26,12 +26,17 @@ doesn't already explain, that's new information: add it to
 .posit/assistant/skills/databricks-healthcare-workshop/SKILL.md so the next
 session doesn't rediscover it from scratch.
 
-Why no dated-snapshot pin (unlike the R/check_packages.R this is modeled on):
-pip/PyPI doesn't have an MRAN/Posit-Package-Manager-style dated mirror to
-pin against -- every published version stays available forever at its own
-exact version string. Pinning exact versions (below) is the closest
-equivalent: it's reproducible without needing a special index URL.
+Uses Posit Package Manager's Python mirror (this environment already has
+one configured for R via /mnt/session/rstudio/repos.conf -- confirmed by
+checking, not assumed) rather than public PyPI directly. Unlike the R
+script, this doesn't need a *dated* snapshot: every package below is
+already pinned to an exact version with `==`, so pointing at PPM's
+`/latest` Python index is still fully reproducible -- the exact version
+string is what's pinned, not "whatever's newest." Tested: the full package
+list below installs and imports cleanly from this index on Python 3.14.2.
 """
+
+PPM_PYPI_INDEX = "https://p3m.dev/pypi/latest/simple"
 
 import importlib
 import importlib.util
@@ -203,7 +208,7 @@ def check_and_install() -> None:
     failed = []
     for pin in missing:
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "install", pin],
+            [sys.executable, "-m", "pip", "install", "--index-url", PPM_PYPI_INDEX, pin],
             capture_output=True,
             text=True,
         )

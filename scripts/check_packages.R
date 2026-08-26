@@ -20,6 +20,19 @@ required_packages <- c(
   "gt"           # tables in Dashboard_r.qmd
 )
 
+# Pin to a DATED Posit Package Manager snapshot, not "/latest". This
+# environment already points R at PPM by default (via
+# /mnt/session/rstudio/repos.conf), but at /latest -- unlike the Python
+# side, install.packages() has no per-call version pin, so the *snapshot
+# date* is what makes this reproducible over time, not just using PPM.
+# Confirmed working (2026-08-26): https://p3m.dev/cran/__linux__/jammy/2026-08-25
+# resolves; the exact current date can 400 until that day's snapshot is
+# finalized, so this uses yesterday's date, not today's.
+options(repos = c(
+  CRAN = "https://p3m.dev/cran/__linux__/jammy/2026-08-25",
+  Bioc = "https://p3m.dev/bioconductor"
+))
+
 user_lib <- Sys.getenv("R_LIBS_USER")
 if (nzchar(user_lib) && !dir.exists(user_lib)) {
   dir.create(user_lib, recursive = TRUE, showWarnings = FALSE)
