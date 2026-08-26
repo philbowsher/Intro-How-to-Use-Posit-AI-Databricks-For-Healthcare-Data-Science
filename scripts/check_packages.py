@@ -245,14 +245,40 @@ def check_quarto() -> None:
             "[warning] Quarto not found on PATH. You'll need it to render the .qmd workflows. "
             "See https://quarto.org/docs/get-started/"
         )
-    import os
 
-    if not os.environ.get("QUARTO_PYTHON"):
+    # Tested finding: .env's QUARTO_PYTHON only affects `quarto render` run from
+    # the CLI with that env var exported. Positron's own Render button ignores
+    # it and uses whatever interpreter is selected top-right instead. Checking
+    # this interpreter (the one running this script) against .env's declared
+    # value at least catches the common case: running check_packages.py from
+    # the same interpreter you intend to use for everything else.
+    try:
+        from dotenv import dotenv_values
+
+        env_values = dotenv_values(".env")
+    except Exception:
+        env_values = {}
+
+    quarto_python = env_values.get("QUARTO_PYTHON")
+    if not quarto_python:
         print(
-            "[info]    QUARTO_PYTHON is not set in this shell. Quarto needs this to find the right "
-            "Python for rendering .qmd files -- set it in your .env as "
-            "QUARTO_PYTHON=.venv/bin/python (see .env.example)."
+            "[info]    QUARTO_PYTHON not found in .env. Quarto needs this to find the right "
+            "Python for CLI renders -- set it to QUARTO_PYTHON=.venv/bin/python (see .env.example). "
+            "Note this does NOT control Positron's Render button (see next check)."
         )
+    else:
+        declared = Path(quarto_python).resolve()
+        current = Path(sys.executable).resolve()
+        if declared == current:
+            print(f"[ok]      This interpreter matches .env's QUARTO_PYTHON ({declared}).")
+        else:
+            print(
+                f"[warning] This interpreter ({current}) does not match .env's QUARTO_PYTHON "
+                f"({declared}). That's fine for this check itself, but remember: neither one "
+                f"controls Positron's Render button -- that uses whatever interpreter is "
+                f"selected top-right in Positron. Set that selector to .venv explicitly; don't "
+                f"assume .env covers it."
+            )
 
 
 if __name__ == "__main__":
