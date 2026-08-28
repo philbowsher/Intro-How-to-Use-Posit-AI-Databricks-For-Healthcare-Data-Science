@@ -216,7 +216,7 @@ Databricks + Posit Workshop
 - Same data, same Databricks backend, either way
 
 <div class="tip-box">
-💡 If you're an R user, this matters for the next step too — you'll also run `Rscript scripts/check_packages.R`.
+💡 If you're an R user, this matters for the next step too — ask Posit Assistant to run `scripts/check_packages.R` for you when you get there.
 </div>
 
 ::: footer
@@ -395,7 +395,7 @@ Databricks + Posit Workshop
 
 ## R via reticulate ⏱ ~15-20 min (optional path)
 
-**First:** `Rscript scripts/check_packages.R` — installs `reticulate`, `dplyr`, `ggplot2`, `gt` and confirms your `.venv` exists.
+**First, ask Posit Assistant:** "Run scripts/check_packages.R for me." (No terminal needed.) It installs `reticulate`, `dplyr`, `ggplot2`, `gt` and confirms your `.venv` exists.
 
 **`new_analysis_r.qmd` and `Dashboard_r.qmd` are separate R versions of Workflows 1 and 2** — not the same file mixing both languages, two distinct documents.
 

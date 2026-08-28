@@ -91,7 +91,7 @@ Workflows 1–2 have R-first twins — `new_analysis_r.qmd` and `Dashboard_r.qmd
 
 These are separate files from the Python versions, not mixed R/Python chunks in one document. Only Workflows 1–2 have this path — Shiny-for-Python and Streamlit are Python-native web runtimes with no meaningful "R via reticulate" equivalent.
 
-Run `Rscript scripts/check_packages.R` first — it checks `reticulate`, `dplyr`, `ggplot2`, and `gt` are installed (falling back to a personal R library if the system one isn't writable), and confirms `.venv` exists before you hit the R documents. See `.posit/assistant/skills/databricks-healthcare-workshop/SKILL.md` for the tested reticulate setup recipe and a couple of non-obvious reticulate/Polars conversion gotchas.
+Ask Posit Assistant: "Run scripts/check_packages.R for me" (no terminal needed; `Rscript scripts/check_packages.R` is the equivalent if you'd rather use one yourself) — it checks `reticulate`, `dplyr`, `ggplot2`, and `gt` are installed (falling back to a personal R library if the system one isn't writable), and confirms `.venv` exists before you hit the R documents. See `.posit/assistant/skills/databricks-healthcare-workshop/SKILL.md` for the tested reticulate setup recipe and a couple of non-obvious reticulate/Polars conversion gotchas.
 
 ---
 
