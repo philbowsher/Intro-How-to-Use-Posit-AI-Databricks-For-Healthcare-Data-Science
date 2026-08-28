@@ -5,6 +5,10 @@ description: Provides the exact data schema, shared connection helper, and teste
 
 # Databricks Healthcare Workshop
 
+## Audience: no terminal usage assumed
+
+Attendees are biostatisticians/clinical analysts, not software engineers — don't tell them to open a terminal or type shell commands themselves. When a student asks you to create `.venv`, run `check_packages.py`, run `databricks_setup.py`, or run `app.py`/`app_streamlit.py`, actually execute those yourself (you have shell/tool access) rather than instructing them to open a terminal and type a command. If a student explicitly says they're comfortable with a terminal, that's fine to offer as an alternative — just don't default to it.
+
 ## Workshop structure
 
 Four working documents, all reading the same dataset via `scripts/databricks_helpers.py`: `new_analysis.qmd`, `Dashboard.qmd`, `app.py`, `app_streamlit.py` (plus R/reticulate variants `new_analysis_r.qmd`, `Dashboard_r.qmd`). Section headers/markers already exist in each — write code into the existing sections rather than proposing a new outline.

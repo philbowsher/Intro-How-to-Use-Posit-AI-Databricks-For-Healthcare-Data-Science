@@ -169,26 +169,18 @@ Databricks + Posit Workshop
 
 ---
 
-## Step 4 — Set Up Python: Do This Exactly, In Order 🐍
+## Step 4 — Set Up Python: No Terminal Needed 🐍
 
-**1.** Open a **Terminal** (Terminal menu → New Terminal — not the Console) and run:
+**Ask Posit Assistant:**
 
-```bash
-uv venv --python 3.14.2 .venv
-```
+> "Create a Python virtual environment for this project called .venv, using Python 3.14.2. Then confirm it's set as this project's Python interpreter."
 
-**2.** Click the interpreter name in the **top-right corner** of Positron. Pick the one inside `.venv`. That corner should now display `.venv` — if it still shows something else, you're not done.
+**I'll run the setup for you** — you don't need to open a terminal or type any commands.
 
-**3.** Confirm it actually worked — open a Console and run:
-
-```python
-import sys; print(sys.executable)
-```
-
-The printed path must contain `.venv`. If it doesn't, go back to step 2 — don't move on yet.
+**Then just click to confirm:** look at the **top-right corner** of Positron. It should now display `.venv`. If it shows something else, click it and pick the one inside `.venv` yourself.
 
 <div class="warning-box">
-⚠️ Skipping or half-finishing this breaks three things later: `.env`'s `QUARTO_PYTHON` setting, Positron's **Render** button, and both R documents. All three assume `.venv` exists **and is actually selected** — not just created.
+⚠️ Skipping or half-finishing this breaks three things later: `.env`'s `QUARTO_PYTHON` setting, Positron's **Render** button, and both R documents. All three assume `.venv` exists **and is actually selected** — not just created. If you're ever unsure, ask Posit Assistant: "What Python interpreter is currently active, and does .venv exist?"
 </div>
 
 ::: footer
@@ -235,15 +227,13 @@ Databricks + Posit Workshop
 
 ## Step 6 — Check Your Packages ⏱ ~5 min
 
-Run this in the **same Terminal** from Step 4 (so it uses `.venv`):
+**Ask Posit Assistant:** "Run scripts/check_packages.py for me."
 
-```bash
-.venv/bin/python scripts/check_packages.py
-```
+Or: open `scripts/check_packages.py` in the editor and click the **Run ▶️** button at the top — no typing required either way.
 
 - Checks everything the workshop needs and installs anything missing, one package at a time
 - Also double-checks `.venv` exists, is selected, and that Quarto can find it
-- Like Step 4, this is infrastructure — just run it exactly as written, no prompting
+- This is infrastructure — just run it exactly as written, no prompting to change what it does
 
 ::: footer
 Databricks + Posit Workshop
@@ -253,9 +243,7 @@ Databricks + Posit Workshop
 
 ## Step 7 — Materialize the Dataset ⏱ ~5 min
 
-```bash
-.venv/bin/python scripts/databricks_setup.py
-```
+**Ask Posit Assistant:** "Run scripts/databricks_setup.py for me." Or open the file and click **Run ▶️**.
 
 - Connects to your Databricks warehouse, runs the workshop's query, writes `data/waiting_list.parquet`
 - Every working document reads from this cache afterward — no repeated live queries
@@ -369,7 +357,7 @@ Databricks + Posit Workshop
 
 > "Add a reactive.calc that filters BASE_DATA by the sidebar inputs, then wire the KPI and chart outputs to it."
 
-Run `source .venv/bin/activate && shiny run app.py` (activating first avoids a "command not found" some students will otherwise hit).
+**Ask Posit Assistant:** "Run app.py as a Shiny app for me." (If Positron shows a **Run App** button on this file, that works too — either way, no terminal typing needed.)
 
 ::: footer
 Databricks + Posit Workshop
@@ -385,7 +373,7 @@ Databricks + Posit Workshop
 
 > "Add reactive metrics showing breaches at the selected target, the delta vs. the 126-day baseline, and estimated additional FTE using: breaches × 45 / (7.5 × 60 × 5 × 48)."
 
-Run `source .venv/bin/activate && streamlit run app_streamlit.py`.
+**Ask Posit Assistant:** "Run app_streamlit.py as a Streamlit app for me."
 
 *If time permits: try the alternate build in `streamlit_app/app.py`, or add a 5th chart to whichever workflow you finished first.*
 

@@ -31,29 +31,18 @@ A workshop demonstrating how to build clinical analytics applications using Data
    - Workspace URL (e.g., `dbc-xxxx.cloud.databricks.com`)
    - SQL Warehouse HTTP Path (e.g., `/sql/1.0/warehouses/xxxxxxxx`)
    - Personal Access Token (PAT)
-4. **Set up Python — do this exactly, in order** (opening this repo by forking + cloning, as step 1-2 just did, means Positron has *not* set up a Python environment for you yet):
-   1. Open a **Terminal** in Positron (Terminal menu → New Terminal — not the Console) and run:
-      ```bash
-      uv venv --python 3.14.2 .venv
-      ```
-      (`uv` fetches Python 3.14.2 itself if it isn't already installed — confirmed a real machine can be missing it entirely; `python3.14 -m venv .venv` would just fail there.)
-   2. Click the interpreter name in Positron's **top-right corner** and select the one inside `.venv`. That corner should now read `.venv`.
-   3. Confirm it worked — in a Console, run `import sys; print(sys.executable)` and check the path contains `.venv`. If not, repeat step 2 before continuing.
+4. **Set up Python — no terminal needed.** Opening this repo by forking + cloning means Positron hasn't set up a Python environment for you yet. Ask Posit Assistant:
+   > "Create a Python virtual environment for this project called .venv, using Python 3.14.2. Then confirm it's set as this project's Python interpreter."
 
-   Skipping or half-finishing this breaks three separate things later: `QUARTO_PYTHON` in `.env`, Positron's **Render** button, and both R documents — all three assume `.venv` exists *and is actually selected*, not just created. (This repo also ships a `.vscode/settings.json` that tries to pre-select `.venv` automatically — still verify it visually, don't rely on it alone.)
+   I'll run the actual setup for you. Then just check the **top-right corner** of Positron — it should read `.venv`. If it shows something else, click it and select the one inside `.venv` yourself.
+
+   Skipping or half-finishing this breaks three separate things later: `QUARTO_PYTHON` in `.env`, Positron's **Render** button, and both R documents — all three assume `.venv` exists *and is actually selected*, not just created. (This repo also ships a `.vscode/settings.json` that tries to pre-select `.venv` automatically — still verify it visually, don't rely on it alone. If you're comfortable with a terminal yourself, the equivalent command is `uv venv --python 3.14.2 .venv`.)
 5. **Create your `.env` file** — ask Posit Assistant:
    > "Create a `.env` file in my project root with fields DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN, and QUARTO_PYTHON=.venv/bin/python. Leave the values blank — I'll fill them in."
 
    Then open the new `.env` file and type in your real credentials. (If you're comfortable with a terminal, `cp .env.example .env` does the same thing.)
-6. **Check your packages** (same Terminal as step 4, so it uses `.venv`):
-   ```bash
-   .venv/bin/python scripts/check_packages.py
-   ```
-   This is infrastructure, not a prompting exercise — just run it. It checks everything the workshop needs and installs anything missing, one package at a time, with a specific hint if something fails — including whether `.venv` exists and whether `shiny`/`streamlit`'s commands will actually be found when you run them later.
-7. **Materialize the dataset:**
-   ```bash
-   .venv/bin/python scripts/databricks_setup.py
-   ```
+6. **Check your packages** — ask Posit Assistant: "Run scripts/check_packages.py for me." (Or open the file and click **Run ▶️**.) This is infrastructure, not a prompting exercise — the script itself does the checking; you're just asking Assistant to execute it, not to write new code. It checks everything the workshop needs and installs anything missing, one package at a time, with a specific hint if something fails.
+7. **Materialize the dataset** — ask Posit Assistant: "Run scripts/databricks_setup.py for me." (Or click **Run ▶️**.)
    Connects to Databricks, runs the workshop's query, and writes `data/waiting_list.parquet`. If this completes cleanly, your `.env` and warehouse are working — every working document below reads from this cache afterward instead of re-querying live each time.
 
 ---
@@ -84,7 +73,7 @@ Reactive web app with live filters (Shiny for Python). This one updates live as 
 **Ask Posit Assistant**, at the marker in each section:
 > "Build the sidebar with filters for Priority and Specialty (dropdowns with an 'All' option), and a checkbox group for Hospital Sites."
 
-Run with (activate your venv first, or `shiny`/`streamlit` commands may not be found): `source .venv/bin/activate && shiny run app.py`
+Ask Posit Assistant: "Run app.py as a Shiny app for me" (no terminal needed — if you prefer a terminal yourself: `source .venv/bin/activate && shiny run app.py`)
 
 ### Workflow 4: `app_streamlit.py`
 What-if capacity planner (Streamlit).
@@ -92,7 +81,7 @@ What-if capacity planner (Streamlit).
 **Ask Posit Assistant**, at the marker in each section:
 > "Add a sidebar slider to adjust RTT wait targets (14–126 days), then reactive metrics showing breaches at target, delta vs the 126-day baseline, and estimated additional FTE staff needed (formula: breaches × 45 / (7.5 × 60 × 5 × 48))."
 
-Run with: `source .venv/bin/activate && streamlit run app_streamlit.py`
+Ask Posit Assistant: "Run app_streamlit.py as a Streamlit app for me" (or, if you prefer a terminal: `source .venv/bin/activate && streamlit run app_streamlit.py`)
 
 ---
 
