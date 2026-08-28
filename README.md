@@ -31,19 +31,28 @@ A workshop demonstrating how to build clinical analytics applications using Data
    - Workspace URL (e.g., `dbc-xxxx.cloud.databricks.com`)
    - SQL Warehouse HTTP Path (e.g., `/sql/1.0/warehouses/xxxxxxxx`)
    - Personal Access Token (PAT)
-4. **Make sure you have a `.venv`.** If you used File → New Project → Python to create this project, Positron already made one for you. If you opened an existing folder instead (fork + clone — the path this workshop actually uses), create one now with `uv venv --python 3.14.2 .venv` (preferred over `python3.14 -m venv .venv`, since `uv` fetches that Python version itself if it's not already installed — confirmed a real machine can be missing it entirely). **Then verify** Positron's Python interpreter (top-right) is actually set to `.venv` — don't assume it switched automatically just because the folder was opened; this repo ships a `.vscode/settings.json` that tries to pre-select it, but check visually regardless. This is what Positron's **Render** button actually uses, separately from `QUARTO_PYTHON` in `.env`. `.env` and the R workflow both assume `.venv` exists — `scripts/check_packages.py` (next step) checks for it and tells you exactly what to do if it's missing.
+4. **Set up Python — do this exactly, in order** (opening this repo by forking + cloning, as step 1-2 just did, means Positron has *not* set up a Python environment for you yet):
+   1. Open a **Terminal** in Positron (Terminal menu → New Terminal — not the Console) and run:
+      ```bash
+      uv venv --python 3.14.2 .venv
+      ```
+      (`uv` fetches Python 3.14.2 itself if it isn't already installed — confirmed a real machine can be missing it entirely; `python3.14 -m venv .venv` would just fail there.)
+   2. Click the interpreter name in Positron's **top-right corner** and select the one inside `.venv`. That corner should now read `.venv`.
+   3. Confirm it worked — in a Console, run `import sys; print(sys.executable)` and check the path contains `.venv`. If not, repeat step 2 before continuing.
+
+   Skipping or half-finishing this breaks three separate things later: `QUARTO_PYTHON` in `.env`, Positron's **Render** button, and both R documents — all three assume `.venv` exists *and is actually selected*, not just created. (This repo also ships a `.vscode/settings.json` that tries to pre-select `.venv` automatically — still verify it visually, don't rely on it alone.)
 5. **Create your `.env` file** — ask Posit Assistant:
    > "Create a `.env` file in my project root with fields DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN, and QUARTO_PYTHON=.venv/bin/python. Leave the values blank — I'll fill them in."
 
    Then open the new `.env` file and type in your real credentials. (If you're comfortable with a terminal, `cp .env.example .env` does the same thing.)
-6. **Check your packages:**
+6. **Check your packages** (same Terminal as step 4, so it uses `.venv`):
    ```bash
-   python scripts/check_packages.py
+   .venv/bin/python scripts/check_packages.py
    ```
    This is infrastructure, not a prompting exercise — just run it. It checks everything the workshop needs and installs anything missing, one package at a time, with a specific hint if something fails — including whether `.venv` exists and whether `shiny`/`streamlit`'s commands will actually be found when you run them later.
 7. **Materialize the dataset:**
    ```bash
-   python scripts/databricks_setup.py
+   .venv/bin/python scripts/databricks_setup.py
    ```
    Connects to Databricks, runs the workshop's query, and writes `data/waiting_list.parquet`. If this completes cleanly, your `.env` and warehouse are working — every working document below reads from this cache afterward instead of re-querying live each time.
 

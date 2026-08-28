@@ -157,30 +157,10 @@ Databricks + Posit Workshop
 https://github.com/philbowsher/Intro-How-to-Use-Posit-AI-Databricks-For-Healthcare-Data-Science
 ```
 
-**Open it in Positron.** This is your project folder. Everything goes here.
+**Open it in Positron.** This is your project folder.
 
-::: footer
-Databricks + Posit Workshop
-:::
-
----
-
-## Step 3b — Make Sure You Have a `.venv` 🐍
-
-**If you created this as a New Project (File → New Project → Python), skip this — Positron already made one.**
-
-If you opened an existing folder instead (fork + clone, the path this workshop actually uses):
-
-```bash
-uv venv --python 3.14.2 .venv
-```
-
-Use `uv venv`, not `python3.14 -m venv .venv` — `uv` fetches Python 3.14.2 itself if it isn't already installed on the machine. `python3.14 -m venv` requires that exact version to already exist, and it may not.
-
-**Then check Positron's Python interpreter (top-right corner) is set to `.venv` — don't assume it switched automatically.** This repo ships a `.vscode/settings.json` that tries to pre-select it, but verify it yourself; opening an existing folder (rather than New Project) is exactly the case that setting exists for, and it's worth a visual check either way.
-
-<div class="warning-box">
-⚠️ Your `.env` file and both R documents hardcode `.venv/bin/python` — skipping this breaks three things later, not just one. And setting `QUARTO_PYTHON` in `.env` isn't enough on its own — Positron's **Render** button uses whatever interpreter is selected top-right, not `.env`. Set both.
+<div class="tip-box">
+💡 This means Positron has **not** set up a Python environment for you yet — that's the next slide, do it exactly as written, in order.
 </div>
 
 ::: footer
@@ -189,7 +169,35 @@ Databricks + Posit Workshop
 
 ---
 
-## Step 4 — Create Your `.env` 🔐
+## Step 4 — Set Up Python: Do This Exactly, In Order 🐍
+
+**1.** Open a **Terminal** (Terminal menu → New Terminal — not the Console) and run:
+
+```bash
+uv venv --python 3.14.2 .venv
+```
+
+**2.** Click the interpreter name in the **top-right corner** of Positron. Pick the one inside `.venv`. That corner should now display `.venv` — if it still shows something else, you're not done.
+
+**3.** Confirm it actually worked — open a Console and run:
+
+```python
+import sys; print(sys.executable)
+```
+
+The printed path must contain `.venv`. If it doesn't, go back to step 2 — don't move on yet.
+
+<div class="warning-box">
+⚠️ Skipping or half-finishing this breaks three things later: `.env`'s `QUARTO_PYTHON` setting, Positron's **Render** button, and both R documents. All three assume `.venv` exists **and is actually selected** — not just created.
+</div>
+
+::: footer
+Databricks + Posit Workshop
+:::
+
+---
+
+## Step 5 — Create Your `.env` 🔐
 
 **Ask Posit Assistant:**
 
@@ -225,12 +233,17 @@ Databricks + Posit Workshop
 
 ---
 
-## Check Your Packages First ⏱ ~5 min
+## Step 6 — Check Your Packages ⏱ ~5 min
 
-- Open `scripts/check_packages.py` and run it: `python scripts/check_packages.py`
+Run this in the **same Terminal** from Step 4 (so it uses `.venv`):
+
+```bash
+.venv/bin/python scripts/check_packages.py
+```
+
 - Checks everything the workshop needs and installs anything missing, one package at a time
-- Also checks your Python version, that `.venv` actually exists, and that Quarto can find your interpreter
-- Like the setup script, this is infrastructure — just run it, no prompting
+- Also double-checks `.venv` exists, is selected, and that Quarto can find it
+- Like Step 4, this is infrastructure — just run it exactly as written, no prompting
 
 ::: footer
 Databricks + Posit Workshop
@@ -238,9 +251,12 @@ Databricks + Posit Workshop
 
 ---
 
-## Materialize the Dataset ⏱ ~5 min
+## Step 7 — Materialize the Dataset ⏱ ~5 min
 
-- Open `scripts/databricks_setup.py` and run it: `python scripts/databricks_setup.py`
+```bash
+.venv/bin/python scripts/databricks_setup.py
+```
+
 - Connects to your Databricks warehouse, runs the workshop's query, writes `data/waiting_list.parquet`
 - Every working document reads from this cache afterward — no repeated live queries
 - This is also your connectivity check: if this runs cleanly, your `.env` and warehouse are working
