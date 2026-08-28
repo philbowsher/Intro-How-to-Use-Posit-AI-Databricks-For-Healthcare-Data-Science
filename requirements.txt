@@ -1,0 +1,23 @@
+# Exact pins, matching scripts/check_packages.py -- keep these in sync.
+# This file exists specifically so `rsconnect deploy` (and any other tool
+# that captures dependencies for a Connect deployment) resolves the same
+# versions tested here, instead of falling back to `pip freeze` against
+# whatever Python happens to be on PATH at deploy time (confirmed real
+# failure mode: a live deploy captured an unrelated system Python's 194
+# packages, including a broken sdist, instead of this project's .venv).
+#
+# polars is pinned to 1.44.1, not 1.44.0 -- 1.44.0 is yanked upstream on
+# PyPI (confirmed via PyPI's JSON API: "when/then/otherwise regression").
+databricks-sql-connector==4.4.0
+polars==1.44.1
+plotly==7.0.0
+shiny==1.7.0
+streamlit==1.62.0
+python-dotenv==1.2.3
+nbformat==5.11.1
+nbclient==0.11.0
+nbconvert==7.17.1
+ipykernel==7.3.0
+pandera==0.32.1
+shinywidgets==0.8.1
+pyyaml==6.0.3

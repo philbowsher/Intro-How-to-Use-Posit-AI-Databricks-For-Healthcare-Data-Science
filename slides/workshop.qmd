@@ -80,7 +80,7 @@ Databricks + Posit Workshop
 ## Key Things to Remember (read this now, not just at the end)
 
 1. Ask **me (Posit Assistant)** to do everything
-2. Credentials always in `.env`
+2. Credentials always in `.env` — **never type your token directly into a console cell or chat**, always go through `load_waiting_list()`
 3. `solutions/` = everything ready to run if you get stuck
 4. If stuck, ask me to regenerate code — don't debug alone
 
@@ -169,13 +169,15 @@ Databricks + Posit Workshop
 
 **If you created this as a New Project (File → New Project → Python), skip this — Positron already made one.**
 
-If you opened an existing folder instead:
+If you opened an existing folder instead (fork + clone, the path this workshop actually uses):
 
 ```bash
-python3.14 -m venv .venv
+uv venv --python 3.14.2 .venv
 ```
 
-Then set Positron's Python interpreter (top-right corner) to `.venv`.
+Use `uv venv`, not `python3.14 -m venv .venv` — `uv` fetches Python 3.14.2 itself if it isn't already installed on the machine. `python3.14 -m venv` requires that exact version to already exist, and it may not.
+
+**Then check Positron's Python interpreter (top-right corner) is set to `.venv` — don't assume it switched automatically.** This repo ships a `.vscode/settings.json` that tries to pre-select it, but verify it yourself; opening an existing folder (rather than New Project) is exactly the case that setting exists for, and it's worth a visual check either way.
 
 <div class="warning-box">
 ⚠️ Your `.env` file and both R documents hardcode `.venv/bin/python` — skipping this breaks three things later, not just one. And setting `QUARTO_PYTHON` in `.env` isn't enough on its own — Positron's **Render** button uses whatever interpreter is selected top-right, not `.env`. Set both.

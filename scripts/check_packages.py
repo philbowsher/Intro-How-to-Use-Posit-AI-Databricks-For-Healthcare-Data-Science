@@ -50,7 +50,13 @@ from pathlib import Path
 # distribution name.
 REQUIRED_PACKAGES = {
     "databricks-sql-connector==4.4.0": "databricks.sql",
-    "polars==1.44.0": "polars",
+    # 1.44.0 is YANKED upstream on PyPI (real, confirmed via PyPI's own JSON API,
+    # reason: "when/then/otherwise regression") -- PPM's /latest mirror can still
+    # serve a yanked version even after PyPI itself pulls it, so "installs fine
+    # locally" is not proof a pin is safe to deploy. If a Connect deploy build
+    # (real PyPI resolution) rejects a version that installs fine here, check
+    # PyPI directly for a yank before assuming it's a local config problem.
+    "polars==1.44.1": "polars",
     "plotly==7.0.0": "plotly",
     "shiny==1.7.0": "shiny",
     "streamlit==1.62.0": "streamlit",
@@ -105,11 +111,17 @@ def check_venv() -> None:
             "(QUARTO_PYTHON=.venv/bin/python) and both R/reticulate documents "
             "(new_analysis_r.qmd, Dashboard_r.qmd) hardcode this path and will fail "
             "without it. Create one now, then re-run this script from inside it:\n"
-            "             python3.14 -m venv .venv\n"
+            "             uv venv --python 3.14.2 .venv\n"
             "             .venv/bin/python scripts/check_packages.py\n"
-            "           Or use Positron's File > New Project > Python, which creates "
-            "and selects .venv for you automatically.\n"
+            "           `uv venv` is preferred over `python3.14 -m venv .venv` here --\n"
+            "           tested finding: it fetches Python 3.14.2 itself if it isn't\n"
+            "           already installed, whereas `python3.14 -m venv` requires that\n"
+            "           exact version to already exist on the machine, which is not\n"
+            "           guaranteed (confirmed: it was genuinely absent on one machine\n"
+            "           this was run on). Or use Positron's File > New Project > Python,\n"
+            "           which creates and selects .venv for you automatically.\n"
         )
+        return
     elif not in_venv:
         print(
             "[info]    .venv exists, but this script isn't currently running inside it. "
@@ -117,6 +129,21 @@ def check_venv() -> None:
         )
     else:
         print("[ok]      Running inside .venv.\n")
+
+    # Tested finding: `uv venv` deliberately creates a venv with NO pip installed
+    # (by design, not a bug) -- unlike `python -m venv`, which always includes it.
+    # check_and_install() below needs pip; self-heal here instead of failing with
+    # a confusing "No module named pip" partway through the package loop.
+    try:
+        import pip  # noqa: F401
+    except ImportError:
+        print("[info]    No pip in this interpreter (expected if this .venv was made with `uv venv`) -- installing it now via ensurepip...")
+        subprocess.run([sys.executable, "-m", "ensurepip"], capture_output=True)
+        try:
+            import pip  # noqa: F401
+            print("[ok]      pip installed.\n")
+        except ImportError:
+            print("[FAILED]  Could not install pip via ensurepip. Try: python -m ensurepip --upgrade\n")
 
 
 def check_cli_commands() -> None:
