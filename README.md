@@ -2,6 +2,11 @@
 
 # https://pub.current.posit.team/public/Posit_Databricks_Healthcare_Data_Science/#/title-slide
 
+# https://pos.it/questionnaire
+
+<img width="1875" height="1875" alt="image" src="https://github.com/user-attachments/assets/a853e008-725a-4b54-a732-fc03a7bebb8f" />
+
+
 A workshop demonstrating how to build clinical analytics applications using Databricks as your data warehouse and Posit tools (Positron IDE, Quarto, Shiny, Streamlit) as your development environment.
 
 **Workshop delivery:** AI driven Analytics with Databricks + Posit
